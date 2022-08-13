@@ -161,6 +161,7 @@ let GameData = function() {
     this.pins = [];
     this.hand = [];
     this.scores = [];
+    this.selectedPins = [];
     this.turn = 0;
     
     this.init = function() {
@@ -168,6 +169,7 @@ let GameData = function() {
         this.pins = [];
         this.hand = [];
         this.scores = [];
+        this.selectedPins = [];
         this.turns = 0;
         this.shuffleDeck();
         this.drawCards();
@@ -193,7 +195,6 @@ let GameData = function() {
             let card = {
                 "value": value,
                 "label": String.fromCharCode("A".charCodeAt(0) + i),
-                "selected": false,
                 "available": false
             };
             this.pins.push(card);
@@ -223,6 +224,7 @@ let GameData = function() {
         let pin = this.pins[pos];
         let adjacent = PIN_ADJACENCY[pos];
         let totalPinsSelected = this.getTotalPinsSelected();
+        
         // Back pins are never available on first turn
         if (this.turn == 0 && pos > 5) {
             return false;
@@ -232,7 +234,7 @@ let GameData = function() {
             return false;
         }
         // Selected pins are always available (to be deselected)
-        if (pin.selected == true) {
+        if (this.isPinSelected(pos)) {
             return true;
         }
         // Adjacent pins are available as long as we don't already have the max number of pins selected
@@ -240,7 +242,9 @@ let GameData = function() {
             if (this.pins[adjacent[i]].value < 0) {
                 return true;
             }
-            if (this.pins[adjacent[i]].selected == true && totalPinsSelected < MAX_SELECTED_PINS) {
+
+            if (this.isPinSelected(adjacent[i]) == true
+                && totalPinsSelected < MAX_SELECTED_PINS) {
                 return true;
             }
         }
@@ -248,26 +252,54 @@ let GameData = function() {
     };
 
     this.getTotalPinsSelected = function() {
-        let total = 0;
-        for (let i=0; i<this.pins.length; i++) {
-            total+= this.pins[i].selected ? 1 : 0;
-        }
-        return total;
+        return this.selectedPins.length;
     };
 
     this.processInput = function(key) {
         for (let i=0; i<this.pins.length; i++) {
             if (key == this.pins[i].label && this.pins[i].available) {
-                this.pins[i].selected=!this.pins[i].selected;
+                if (this.isPinSelected(i) == false) {
+                    this.selectedPins.push(i);
+                } else {
+                    this.deselectPin(i);
+                }
             }
         }
         this.updateAvailable();
+    };
+
+    this.isPinSelected = function(pos) {
+        for (let i=0; i<this.selectedPins.length; i++) {
+            if (this.selectedPins[i] == pos) {
+                return true;
+            }
+        }
+        return false;
+        //return (this.selectedPins.indexOf(pos) >= 0);
+    };
+
+    this.deselectPin = function(pos) {
+        // For now, just clear all selections to avoid non-adjacent selections
+        // until I can implement proper logic to handle it.
+        this.selectedPins = [];
+    };
+
+    this.getSelectedPinSum = function() {
+        if (this.selectedPins.length < 1) {
+            return -1;
+        }
+        let sum = 0;
+        for (let i=0; i<this.selectedPins.length; i++) {
+            sum += this.pins[this.selectedPins[i]].value;
+        }
+        return sum % 10;
     };
 };
 
 let util = new TextUtil();
 let gameData = new GameData();
 let keyBuffer = "";
+var debugText = "";
 
 const SCREEN_WIDTH = 56;
 const SCREEN_HEIGHT = 20;
@@ -292,6 +324,8 @@ function onUpdate() {
     drawPinCards();
     drawScore();
     // drawLogin();
+    debugText = gameData.getSelectedPinSum();
+    drawText(debugText, 3, 0, SCREEN_HEIGHT-1);
 }
 
 function onInput(key) {
@@ -303,7 +337,6 @@ function onInput(key) {
 
     let keyChar = String.fromCharCode(key).toUpperCase();
     gameData.processInput(keyChar);
-    gameData.updateAvailable();
 }
 
 function drawLogin() {
@@ -335,7 +368,7 @@ function drawHand() {
 function drawPinCards() {
     for (let i=0; i<this.gameData.pins.length; i++) {
         let pin = gameData.pins[i];
-        drawPinCard(i+1, pin.label, pin.value, pin.selected, pin.available);
+        drawPinCard(i+1, pin.label, pin.value, gameData.isPinSelected(i), pin.available);
     }
 }
 
