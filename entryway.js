@@ -1,8 +1,3 @@
-const SCREEN_WIDTH = 56;
-const SCREEN_HEIGHT = 20;
-const PIN_ORIGIN_X = 24;
-const PIN_ORIGIN_Y = 3;
-
 let TextUtil  = function() {
     const TOK_TEXT = 0;
     const TOK_COLOR = 1;
@@ -145,7 +140,140 @@ let TextUtil  = function() {
     };
 }
 
+let GameData = function() {
+    const TOTAL_PINS = 10;
+    const TOTAL_CARDS = 20;
+    const MAX_SELECTED_PINS = 3;
+    const PIN_ADJACENCY = [
+        [1,2],
+        [0,2,3,4],
+        [0,1,4,5],
+        [1,4,6,7],
+        [1,2,3,5,7,8],
+        [2,4,8,9],
+        [3,7],
+        [3,4,6,8],
+        [4,5,7,9],
+        [5,8]
+    ];
+
+    this.deck = [];
+    this.pins = [];
+    this.hand = [];
+    this.scores = [];
+    this.turn = 0;
+    
+    this.init = function() {
+        this.deck = [];
+        this.pins = [];
+        this.hand = [];
+        this.scores = [];
+        this.turns = 0;
+        this.shuffleDeck();
+        this.drawCards();
+        this.updateAvailable();
+    };
+
+    this.shuffleDeck = function() {
+        for (let i=0; i<TOTAL_CARDS; i++) {
+            this.deck.push((i+1) % TOTAL_PINS);
+        }
+        for (let i=this.deck.length-1; i>0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            let temp = this.deck[i];
+            this.deck[i] = this.deck[j];
+            this.deck[j] = temp;
+        }
+    };
+
+    this.drawCards = function() {
+        // Pins
+        for (let i=0; i<TOTAL_PINS; i++) {
+            let value = this.deck.pop();
+            let card = {
+                "value": value,
+                "label": String.fromCharCode("A".charCodeAt(0) + i),
+                "selected": false,
+                "available": false
+            };
+            this.pins.push(card);
+        }
+        // Hand
+        for (let i=0; i<10; i++) {
+            
+        }
+    };
+
+    this.updateAvailable = function() {
+        if (this.turn == 0 && this.getTotalPinsSelected() == 0) {
+            this.pins[0].available = true;
+            this.pins[1].available = true;
+            this.pins[2].available = true;
+            this.pins[3].available = true;
+            this.pins[4].available = false;
+            this.pins[5].available = true;
+            return;
+        } 
+        for (let i=0; i<TOTAL_PINS; i++) {
+            this.pins[i].available = this.isPinAvailable(i);
+        }
+    };
+
+    this.isPinAvailable = function(pos) {
+        let pin = this.pins[pos];
+        let adjacent = PIN_ADJACENCY[pos];
+        let totalPinsSelected = this.getTotalPinsSelected();
+        // Back pins are never available on first turn
+        if (this.turn == 0 && pos > 5) {
+            return false;
+        }
+        // Removed pins are not available
+        if (pin.value < 0) {
+            return false;
+        }
+        // Selected pins are always available (to be deselected)
+        if (pin.selected == true) {
+            return true;
+        }
+        // Adjacent pins are available as long as we don't already have the max number of pins selected
+        for (let i=0; i<adjacent.length; i++) {
+            if (this.pins[adjacent[i]].value < 0) {
+                return true;
+            }
+            if (this.pins[adjacent[i]].selected == true && totalPinsSelected < MAX_SELECTED_PINS) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    this.getTotalPinsSelected = function() {
+        let total = 0;
+        for (let i=0; i<this.pins.length; i++) {
+            total+= this.pins[i].selected ? 1 : 0;
+        }
+        return total;
+    };
+
+    this.processInput = function(key) {
+        for (let i=0; i<this.pins.length; i++) {
+            if (key == this.pins[i].label && this.pins[i].available) {
+                this.pins[i].selected=!this.pins[i].selected;
+            }
+        }
+        this.updateAvailable();
+    };
+};
+
 let util = new TextUtil();
+let gameData = new GameData();
+let keyBuffer = "";
+
+const SCREEN_WIDTH = 56;
+const SCREEN_HEIGHT = 20;
+const PIN_ORIGIN_X = 24;
+const PIN_ORIGIN_Y = 3;
+
 
 function getName() {
     return "Entryway BBS";
@@ -153,6 +281,8 @@ function getName() {
 
 function onConnect() {
     util.setBlinkSpeed(1);
+    keyBuffer = "";
+    gameData.init();
 }
 
 function onUpdate() {
@@ -164,7 +294,16 @@ function onUpdate() {
     // drawLogin();
 }
 
-function onInput() {
+function onInput(key) {
+    if (key == 8 && keyBuffer.length > 0) {
+        keyBuffer = keyBuffer.substring(0, keyBuffer.length - 1);
+    } else if (key >= 32 && key < 127 && keyBuffer.length < 49) {
+        keyBuffer = keyBuffer + String.fromCharCode(key);
+    }
+
+    let keyChar = String.fromCharCode(key).toUpperCase();
+    gameData.processInput(keyChar);
+    gameData.updateAvailable();
 }
 
 function drawLogin() {
@@ -194,16 +333,10 @@ function drawHand() {
 }
 
 function drawPinCards() {
-    drawPinCard(1, "A", 0);
-    drawPinCard(2, "B", 0, false, true);
-    drawPinCard(3, "C", 0, false, true);
-    drawPinCard(4, "D", 0, false, true);
-    drawPinCard(5, "E", 0, true, true);
-    drawPinCard(6, "F", 0, true, true);
-    drawPinCard(7, "G", 0);
-    drawPinCard(8, "H", 0);
-    drawPinCard(9, "I", 0);
-    drawPinCard(10, "J", 0);
+    for (let i=0; i<this.gameData.pins.length; i++) {
+        let pin = gameData.pins[i];
+        drawPinCard(i+1, pin.label, pin.value, pin.selected, pin.available);
+    }
 }
 
 function drawScore() {
@@ -217,14 +350,24 @@ function drawScore() {
 }
 
 
+/**
+ * Pin position numbers
+ *     7 8 9 10
+ *      4 5 6
+ *       2 3
+ *        1
+ * @param {*} pos 
+ * @param {*} label 
+ * @param {*} value 
+ * @param {*} selected 
+ * @param {*} available 
+ * @returns 
+ */
 function drawPinCard(pos, label, value, selected, available) {
-    /*
-       Pin position numbers
-       7 8 9 10
-        4 5 6
-         2 3
-          1
-    */
+    // Cards with values less than 0 have been removed from play, so we don't draw them.
+    if (value < 0) {
+        return;
+    }
     let cardWidth = 5;
     let cardHeight= 3;
     let cardPadding = 3;
@@ -282,11 +425,4 @@ function drawHandCard(pos, value, stackSize, available) {
         drawText(cardMiddle, color, card.x + col, row + i + 2);
     }
     drawText(cardBottom, color, card.x + col, row + stackSize + 1);
-}
-
-function drawMultilineText(text, color, x, y) {
-    let lines = text.split("\n");
-    for (let i=0; i<lines.length; i++) {
-        drawText(lines[i], 16, x, i + y);
-    }
 }
