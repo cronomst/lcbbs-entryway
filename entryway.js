@@ -395,23 +395,39 @@ let GameData = function() {
     };
 
     this.getFrameScore = function(frameNum) {
+        if (frameNum < 1 || frameNum > 10) {
+            return false;
+        }
         let result = {
             "first": "",
             "second": "",
             "third": "",
             "total": ""
         };
+        let frameIndex = frameNum - 1;
         let p = this.player;
-        let roll1 = this.scores[p][frameNum*2] == 10 ? "X" : this.scores[p][frameNum*2]
-        let roll2 = this.scores[p][frameNum*2 + 1]
+        let roll1 = this.scores[p][frameIndex*2];
+        let roll2 = this.scores[p][frameIndex*2 + 1];
+        let nextFrameRoll1Index = (frameIndex+1)*2;
+        let nextFrameRoll2Index = (frameIndex+1)*2 + 1;
         if (this.frame > frameNum) {
             // frame in the past
             result.first = roll1;
             result.second = roll2;
-        } else if (this.frame < frameNum) {
-            // frame in the future
-        } else {
+            let total = result.first + result.second;
+            if (total < 10) {
+                result.total = total;
+            }
+            if (result.first == 10 && frameNum + 1 < this.frame) {
+                result.total = 10 + this.scores[p][nextFrameRoll1Index] + this.scores[p][nextFrameRoll2Index]
+            } else if (total == 10 && this.roll > 0) {
+                result.total = 10 + this.scores[p][nextFrameRoll1Index];
+            }
+        } else if (this.frame == frameNum) {
             // current frame
+            if (this.roll == 1) {
+                result.first = roll1;
+            }
         }
 
         return result;
@@ -505,14 +521,26 @@ function drawScore() {
     let box4 = " ";
     let frameScore1 = "   ";
     let frameScore2 = "   ";
+    let frameData = gameData.getFrameScore(gameData.frame);
+    let prevFrameData = gameData.getFrameScore(gameData.frame-1);
+    let frameSymbols = getFrameSymbols(frameData);
+    let prevFrameSymbols = getFrameSymbols(prevFrameData);
+
     
     if (gameData.frame == 1) {
         frameLeft = "~H1~F";
         frameRight = "~52~F";
-
+        box1 = padString(frameSymbols.first, 1);
+        box2 = padString(frameSymbols.second, 1);
     } else {
         frameLeft = "~5" + (gameData.frame - 1) + "~F";
         frameRight = "~H" + gameData.frame + "~F";
+        box1 = padString(prevFrameSymbols.first, 1);
+        box2 = padString(prevFrameSymbols.second, 1);
+        box3 = padString(frameSymbols.first, 1);
+        box4 = padString(frameSymbols.second, 1);
+        frameScore1 = padString(prevFrameData.total, 3);
+        frameScore2 = padString(frameData.total, 3);
     }
     let frameSegment = "   ╔═══╦═══╗\n" +
                        "   ║ " + frameLeft + " ║ " + frameRight + " ║\n" +
@@ -520,10 +548,31 @@ function drawScore() {
                        "║" + initials + "║" + box1 + "║" + box2 + "║" + box3 + "║" + box4 + "║\n" +
                        "║  ║" + frameScore1 + "║" + frameScore2 + "║\n" +
                        "╚══╩═══╩═══╝";
-    for (let i=0; i<10; i++) {
-        util.draw("║9:-", 15, i*4, 2);
-    }
     util.draw(frameSegment, 15, col, row);
+}
+
+function getFrameSymbols(frameData) {
+    let result = {
+        "first": frameData.first,
+        "second": frameData.second,
+        "third": frameData.third
+    }
+    if (frameData.first == 10) {
+        result.first = 'X';
+        return result;
+    } else if (frameData.first + frameData.second == 10) {
+        result.second = '/';
+    }
+    if (frameData.first === 0) {
+        result.first = '-';
+    }
+    if (frameData.second === 0) {
+        result.second = '-';
+    }
+    if (frameData.third === 0) {
+        result.third = '-';
+    }
+    return result;
 }
 
 
@@ -605,4 +654,13 @@ function drawHandCard(pos, value, stackSize, available) {
         drawText(cardMiddle, color, card.x + col, row + i + 2);
     }
     drawText(cardBottom, color, card.x + col, row + stackSize + 1);
+}
+
+function padString(value, padding) {
+    let padAmt = padding - value.toString().length;
+    let result = value.toString();
+    for (let i=0; i<padAmt; i++) {
+        result = ' ' + result;
+    }
+    return result;
 }

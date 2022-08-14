@@ -4,6 +4,8 @@ var UnitTests = function() {
     this.run = function() {
         this.testUpdateFrameScore();
         this.testGetFrameScore();
+        this.testPadString();
+        this.testGetFrameSymbols();
 
         this.displayOutput();
     };
@@ -78,15 +80,65 @@ var UnitTests = function() {
         let actual;
         game.init();
         game.scores = [
-            [5,4,9, 10,0,20, 9,1,11, 1,0,1, 0,0,0]
+            [5,4, 10,0, 9,1, 1,0, 0,0]
         ];
         actual = game.getFrameScore(1);
         this.assertEquals("", actual.first, "No scores yet on first roll of first frame");
+        
         game.nextRoll();
         actual = game.getFrameScore(1);
         this.assertEquals(5, actual.first, "Score set after first roll of first frame");
         this.assertEquals("", actual.second, "No score yet on second of first frame");
+
+        game.nextRoll();
+        actual = game.getFrameScore(1);
+        this.assertEquals(5, actual.first, "Score set after first roll of first frame");
+        this.assertEquals(4, actual.second, "Score set after second roll of first frame");
+        this.assertEquals(9, actual.total, "End of first frame, so total is set");
+        actual = game.getFrameScore(2);
+        this.assertEquals("", actual.first, "No scores yet on first roll of second frame");
+
+        game.roll = 0;
+        game.frame = 3;
+        actual = game.getFrameScore(2);
+        this.assertEquals(10, actual.first, "Strike, so first roll is 10");
+        this.assertEquals(0, actual.second, "Strike, so 0 for second roll");
+        this.assertEquals("", actual.total, "Get score for frame 2 strike while on beginning of frame 3, so no total yet");
+
+        game.frame = 4;
+        actual = game.getFrameScore(2);
+        this.assertEquals(20, actual.total, "Get score for frame 2 strike while on beginning of frame 4, so total available");
+
+        game.frame = 5;
+        actual = game.getFrameScore(3);
+        this.assertEquals("", actual.total, "Get score for frame 3 spare while on beginning of frame 4, so no total yet");
+        game.roll = 1;
+        actual = game.getFrameScore(3);
+        this.assertEquals(11, actual.total, "Get score for frame 3 spare while on 2nd roll of of frame 4, so total available");
+
+        game.frame = 1;
+        game.roll = 0;
+        actual = game.getFrameScore(0);
+        this.assertEquals(false, actual, "Out of bounds frame score request should be false");
+
     };
+
+    this.testPadString = function() {
+        this.out('<h3>testPadString</h3>');
+        this.assertEquals("  5", padString(5, 3), "Pad number");
+        this.assertEquals(" X", padString("X", 2), "Pad string");
+        this.assertEquals("abc", padString("abc", 1), "Pad too long string");
+    };
+
+    this.testGetFrameSymbols = function() {
+        this.out('<h3>testGetFrameSymbols</h3>');
+        let actual = getFrameSymbols({"first": 10, "second": 0, "third": 0});
+        this.assertEquals('X', actual.first, "Strike is an X");
+        this.assertEquals('', actual.second, "Second roll of strike is a blank");
+
+        actual = getFrameSymbols({"first": 5, "second": "", "third": ""});
+        this.assertEquals(5, actual.first, "5 should just be itself");
+    }
 
     this.knockDownPins = function(game, count) {
         for (let i=0; i<count; i++) {
