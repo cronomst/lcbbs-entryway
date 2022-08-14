@@ -294,6 +294,7 @@ let GameData = function() {
             this.playCard(2);
         }
         if (key == " ") {
+            this.updateFrameScore();
             this.nextRoll();
         }
         this.updateAvailable();
@@ -345,6 +346,9 @@ let GameData = function() {
             this.pins[this.selectedPins[i]].value = -1;
         }
         this.nextTurn();
+        if (this.getPinsDown() == TOTAL_PINS) {
+            // TODO: Trigger strike/spare
+        }
         return true;
     };
 
@@ -370,26 +374,47 @@ let GameData = function() {
 
     this.updateFrameScore = function() {
         let p = this.player;
+        let totalDownedPinCount = this.getPinsDown();
+        let frameDownedPinCount = totalDownedPinCount;
+        let scoreRollIndex = (this.frame-1) * 2 + this.roll;
+
+        if (this.roll == 1) {
+            frameDownedPinCount -= this.scores[p][scoreRollIndex-1];
+        }
+        this.scores[p][scoreRollIndex] = frameDownedPinCount;
+    };
+
+    this.getPinsDown = function() {
         let totalDownedPinCount = 0;
-        let frameDownedPinCount = 0;
-        let scoreRollIndex = (this.frame-1) * 3 + this.roll;
-        let scoreFrameIndex = (this.frame-1) * 3 + 2;
         for (let i=0; i<this.pins.length; i++) {
             if (this.pins[i].value < 0) {
                 totalDownedPinCount++;
             }
         }
-        frameDownedPinCount = totalDownedPinCount;
-        if (this.roll == 1) {
-            if (totalDownedPinCount < 10) {
-                this.scores[p][scoreFrameIndex] = totalDownedPinCount;
-            } else {
-                // Use -1 for the frame score to flag that it is pending subsequent roll results
-                this.scores[p][scoreFrameIndex] = -1;
-            }
-            frameDownedPinCount -= this.scores[p][scoreRollIndex-1];
+        return totalDownedPinCount;
+    };
+
+    this.getFrameScore = function(frameNum) {
+        let result = {
+            "first": "",
+            "second": "",
+            "third": "",
+            "total": ""
+        };
+        let p = this.player;
+        let roll1 = this.scores[p][frameNum*2] == 10 ? "X" : this.scores[p][frameNum*2]
+        let roll2 = this.scores[p][frameNum*2 + 1]
+        if (this.frame > frameNum) {
+            // frame in the past
+            result.first = roll1;
+            result.second = roll2;
+        } else if (this.frame < frameNum) {
+            // frame in the future
+        } else {
+            // current frame
         }
-        this.scores[p][scoreRollIndex] = frameDownedPinCount;
+
+        return result;
     };
 
 };
@@ -471,19 +496,33 @@ function drawPinCards() {
 function drawScore() {
     let row = 3;
     let col = 1;
+    let initials = "P1";
+    let frameLeft;
+    let frameRight;
+    let box1 = " ";
+    let box2 = " ";
+    let box3 = " ";
+    let box4 = " ";
+    let frameScore1 = "   ";
+    let frameScore2 = "   ";
+    
+    if (gameData.frame == 1) {
+        frameLeft = "~H1~F";
+        frameRight = "~52~F";
+
+    } else {
+        frameLeft = "~5" + (gameData.frame - 1) + "~F";
+        frameRight = "~H" + gameData.frame + "~F";
+    }
     let frameSegment = "   ╔═══╦═══╗\n" +
-                       "   ║ ~51~F ║ ~H2~F ║\n" +
+                       "   ║ " + frameLeft + " ║ " + frameRight + " ║\n" +
                        "╔══╬═╦═╬═╦═╣\n" +
-                       "║P1║9║-║ ║ ║\n" +
-                       "║  ║  9║   ║\n" +
+                       "║" + initials + "║" + box1 + "║" + box2 + "║" + box3 + "║" + box4 + "║\n" +
+                       "║  ║" + frameScore1 + "║" + frameScore2 + "║\n" +
                        "╚══╩═══╩═══╝";
-    let frame = "╦════╦\n" +
-                "║ 9:/║\n" +
-                "║ 299║\n" +
-                "╩════╩";
-    //drawBox(13, col, row, 18, 4);
-    //util.draw(frame, 15, col+3, row);
-    //util.draw(frame, 15, col+8, row);
+    for (let i=0; i<10; i++) {
+        util.draw("║9:-", 15, i*4, 2);
+    }
     util.draw(frameSegment, 15, col, row);
 }
 
