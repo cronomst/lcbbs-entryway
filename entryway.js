@@ -168,7 +168,7 @@ let GameData = function() {
     this.frame = 0;
     
     this.init = function() {
-        this.scores = [];
+        this.scores = [[]];
         this.nextFrame();
         this.updateAvailable();
     };
@@ -272,7 +272,9 @@ let GameData = function() {
         return this.selectedPins.length;
     };
 
-    this.processInput = function(key) {
+    this.processInput = function(keyCode) {
+        let key = String.fromCharCode(keyCode).toUpperCase();
+
         for (let i=0; i<this.pins.length; i++) {
             if (key == this.pins[i].label && this.pins[i].available) {
                 if (this.isPinSelected(i) == false) {
@@ -366,11 +368,34 @@ let GameData = function() {
         }
     };
 
+    this.updateFrameScore = function() {
+        let p = this.player;
+        let totalDownedPinCount = 0;
+        let frameDownedPinCount = 0;
+        let scoreRollIndex = (this.frame-1) * 3 + this.roll;
+        let scoreFrameIndex = (this.frame-1) * 3 + 2;
+        for (let i=0; i<this.pins.length; i++) {
+            if (this.pins[i].value < 0) {
+                totalDownedPinCount++;
+            }
+        }
+        frameDownedPinCount = totalDownedPinCount;
+        if (this.roll == 1) {
+            if (totalDownedPinCount < 10) {
+                this.scores[p][scoreFrameIndex] = totalDownedPinCount;
+            } else {
+                // Use -1 for the frame score to flag that it is pending subsequent roll results
+                this.scores[p][scoreFrameIndex] = -1;
+            }
+            frameDownedPinCount -= this.scores[p][scoreRollIndex-1];
+        }
+        this.scores[p][scoreRollIndex] = frameDownedPinCount;
+    };
+
 };
 
 let util = new TextUtil();
 let gameData = new GameData();
-let keyBuffer = "";
 var debugText = "";
 
 const SCREEN_WIDTH = 56;
@@ -385,7 +410,6 @@ function getName() {
 
 function onConnect() {
     util.setBlinkSpeed(1);
-    keyBuffer = "";
     gameData.init();
 }
 
@@ -394,7 +418,7 @@ function onUpdate() {
     util.updateBlink();
     drawHand();
     drawPinCards();
-    //drawScore();
+    drawScore();
     //drawLogin();
     util.draw("Press ~FSPACE~9 to end roll", 9,
         SCREEN_WIDTH/2 - 11, SCREEN_HEIGHT-2);
@@ -403,14 +427,7 @@ function onUpdate() {
 }
 
 function onInput(key) {
-    if (key == 8 && keyBuffer.length > 0) {
-        keyBuffer = keyBuffer.substring(0, keyBuffer.length - 1);
-    } else if (key >= 32 && key < 127 && keyBuffer.length < 49) {
-        keyBuffer = keyBuffer + String.fromCharCode(key);
-    }
-
-    let keyChar = String.fromCharCode(key).toUpperCase();
-    gameData.processInput(keyChar);
+    gameData.processInput(key);
 }
 
 function drawLogin() {
@@ -454,11 +471,20 @@ function drawPinCards() {
 function drawScore() {
     let row = 3;
     let col = 1;
-    drawBox(13, col, row, 18, 4);
-    drawText("╦════╦", 15, col+3, row);
-    drawText("║ 9:/║", 15, col+3, row+1);
-    drawText("║ 299║", 15, col+3, row+2);
-    drawText("╩════╩", 15, col+3, row+3);
+    let frameSegment = "   ╔═══╦═══╗\n" +
+                       "   ║ ~51~F ║ ~H2~F ║\n" +
+                       "╔══╬═╦═╬═╦═╣\n" +
+                       "║P1║9║-║ ║ ║\n" +
+                       "║  ║  9║   ║\n" +
+                       "╚══╩═══╩═══╝";
+    let frame = "╦════╦\n" +
+                "║ 9:/║\n" +
+                "║ 299║\n" +
+                "╩════╩";
+    //drawBox(13, col, row, 18, 4);
+    //util.draw(frame, 15, col+3, row);
+    //util.draw(frame, 15, col+8, row);
+    util.draw(frameSegment, 15, col, row);
 }
 
 
