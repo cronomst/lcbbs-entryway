@@ -163,17 +163,25 @@ let GameData = function() {
     this.scores = [];
     this.selectedPins = [];
     this.turn = 0;
+    this.roll = 0;
+    this.frame = 0;
     
     this.init = function() {
+        this.nextFrame();
+        this.updateAvailable();
+    };
+
+    this.nextFrame = function() {
+        this.frame++;
         this.deck = [];
         this.pins = [];
-        this.hand = [];
+        this.hand = [[],[],[]];
         this.scores = [];
         this.selectedPins = [];
-        this.turns = 0;
+        this.turn = 0;
+        this.roll = 0;
         this.shuffleDeck();
         this.drawCards();
-        this.updateAvailable();
     };
 
     this.shuffleDeck = function() {
@@ -200,8 +208,14 @@ let GameData = function() {
             this.pins.push(card);
         }
         // Hand
-        for (let i=0; i<10; i++) {
-            
+        for (let i=0; i<5; i++) {
+            this.hand[0].push(this.deck.pop());
+        }
+        for (let i=0; i<3; i++) {
+            this.hand[1].push(this.deck.pop());
+        }
+        for (let i=0; i<2; i++) {
+            this.hand[2].push(this.deck.pop());
         }
     };
 
@@ -237,9 +251,11 @@ let GameData = function() {
         if (this.isPinSelected(pos)) {
             return true;
         }
+
         // Adjacent pins are available as long as we don't already have the max number of pins selected
         for (let i=0; i<adjacent.length; i++) {
-            if (this.pins[adjacent[i]].value < 0) {
+            if (this.pins[adjacent[i]].value < 0
+                && totalPinsSelected == 0) {
                 return true;
             }
 
@@ -264,6 +280,18 @@ let GameData = function() {
                     this.deselectPin(i);
                 }
             }
+        }
+        if (key == "X") {
+            this.playCard(0);
+        }
+        if (key == "Y") {
+            this.playCard(1);
+        }
+        if (key == "Z") {
+            this.playCard(2);
+        }
+        if (key == " ") {
+            this.nextRoll();
         }
         this.updateAvailable();
     };
@@ -294,6 +322,39 @@ let GameData = function() {
         }
         return sum % 10;
     };
+
+    this.playCard = function(handPos) {
+        if (this.hand[handPos][0] !== this.getSelectedPinSum()) {
+            return false;
+        }
+        let playedCard = this.hand[handPos].shift();
+        for (let i=0; i<this.selectedPins.length; i++) {
+            this.pins[this.selectedPins[i]].value = -1;
+        }
+        this.nextTurn();
+        return true;
+    };
+
+    this.nextTurn = function() {
+        this.turn++;
+        this.selectedPins = [];
+    };
+
+    this.nextRoll = function() {
+        this.selectedPins = [];
+        this.roll++;
+        if (this.roll > 1) {
+            this.nextFrame();
+            return;
+        }
+
+        for (let i=0; i<this.hand.length; i++) {
+            if (this.hand[i].length > 0) {
+                this.hand[i].shift();
+            }
+        }
+    };
+
 };
 
 let util = new TextUtil();
@@ -324,6 +385,8 @@ function onUpdate() {
     drawPinCards();
     drawScore();
     // drawLogin();
+    util.draw("Press ~FSPACE~9 to end roll", 9,
+        SCREEN_WIDTH/2 - 11, SCREEN_HEIGHT-2);
     debugText = gameData.getSelectedPinSum();
     drawText(debugText, 3, 0, SCREEN_HEIGHT-1);
 }
@@ -360,9 +423,14 @@ function drawLogin() {
 }
 
 function drawHand() {
-    drawHandCard(1, 5, 5, false);
-    drawHandCard(2, 3, 3, false);
-    drawHandCard(3, 1, 2, false);
+    let sum = gameData.getSelectedPinSum();
+    for (let i=0; i<gameData.hand.length; i++) {
+        let isAvailable = (gameData.hand[i][0] == sum)
+        drawHandCard(i+1,
+            gameData.hand[i][0],
+            gameData.hand[i].length,
+            isAvailable);
+    }
 }
 
 function drawPinCards() {
@@ -444,6 +512,9 @@ function drawHandCard(pos, value, stackSize, available) {
             "x": 16
         }
     ];
+    if (available) {
+        value = "_" + value + "_";
+    }
     let row = 12;
     let col = 3;
     let card = cardData[pos-1];
