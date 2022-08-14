@@ -22,7 +22,7 @@ let TextUtil  = function() {
      * Use "_" in the text string to turn blinking on or off.
      * 
      * @example
-     *    draw("This is ~2DARK~C.\nThis is ~HBRIGHT~C.\nThis _blinks_.", 13, 0, 0);
+     * draw("This is ~2DARK~C.\nThis is ~HBRIGHT~C.\nThis _blinks_.", 13, 0, 0);
      * 
      * @param {string} text Text to be displayed
      * @param {int} defaultColor Initial color to use
@@ -162,11 +162,13 @@ let GameData = function() {
     this.hand = [];
     this.scores = [];
     this.selectedPins = [];
+    this.player = 0;
     this.turn = 0;
     this.roll = 0;
     this.frame = 0;
     
     this.init = function() {
+        this.scores = [];
         this.nextFrame();
         this.updateAvailable();
     };
@@ -176,7 +178,6 @@ let GameData = function() {
         this.deck = [];
         this.pins = [];
         this.hand = [[],[],[]];
-        this.scores = [];
         this.selectedPins = [];
         this.turn = 0;
         this.roll = 0;
@@ -303,13 +304,23 @@ let GameData = function() {
             }
         }
         return false;
-        //return (this.selectedPins.indexOf(pos) >= 0);
     };
 
     this.deselectPin = function(pos) {
-        // For now, just clear all selections to avoid non-adjacent selections
-        // until I can implement proper logic to handle it.
+        // For now, just deselect everything because the logic below
+        // doesn't work when only one item remains and it should
+        // not be selectable on its own.
         this.selectedPins = [];
+
+        // this.selectedPins.splice(this.selectedPins.indexOf(pos), 1);
+        // // Remove another selection if we break the adjacency rule
+        // if (this.selectedPins.length > 1) {
+        //     leftPin = this.selectedPins[0];
+        //     rightPin = this.selectedPins[1];
+        //     if (PIN_ADJACENCY[leftPin].indexOf(rightPin) < 0) {
+        //         this.selectedPins.pop();
+        //     }
+        // }
     };
 
     this.getSelectedPinSum = function() {
@@ -383,11 +394,11 @@ function onUpdate() {
     util.updateBlink();
     drawHand();
     drawPinCards();
-    drawScore();
-    // drawLogin();
+    //drawScore();
+    //drawLogin();
     util.draw("Press ~FSPACE~9 to end roll", 9,
         SCREEN_WIDTH/2 - 11, SCREEN_HEIGHT-2);
-    debugText = gameData.getSelectedPinSum();
+    //debugText = gameData.getSelectedPinSum();
     drawText(debugText, 3, 0, SCREEN_HEIGHT-1);
 }
 
