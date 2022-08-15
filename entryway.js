@@ -437,12 +437,18 @@ let GameData = function() {
 
 let util = new TextUtil();
 let gameData = new GameData();
+let state = STATE_LOGIN;
+
 var debugText = "";
 
 const SCREEN_WIDTH = 56;
 const SCREEN_HEIGHT = 20;
 const PIN_ORIGIN_X = 24;
 const PIN_ORIGIN_Y = 3;
+const STATE_LOGIN = 0;
+const STATE_DOORS = 1;
+const STATE_SETTINGS = 2;
+const STATE_GAME = 3;
 
 
 function getName() {
@@ -452,23 +458,55 @@ function getName() {
 function onConnect() {
     util.setBlinkSpeed(1);
     gameData.init();
+    state = STATE_LOGIN;
 }
 
 function onUpdate() {
     clearScreen();
     util.updateBlink();
-    drawHand();
-    drawPinCards();
-    drawScore();
-    //drawLogin();
-    util.draw("Press ~FSPACE~9 to end roll", 9,
-        SCREEN_WIDTH/2 - 11, SCREEN_HEIGHT-2);
-    //debugText = gameData.getSelectedPinSum();
-    drawText(debugText, 3, 0, SCREEN_HEIGHT-1);
+    switch (state) {
+        case STATE_LOGIN:
+            drawLogin();
+            break;
+        case STATE_DOORS:
+            drawDoorsMenu();
+            break;
+        case STATE_SETTINGS:
+            drawSettingsMenu();
+            break;
+        case STATE_GAME:
+            drawHand();
+            drawPinCards();
+            drawScore();
+            util.draw("Press ~FSPACE~9 to end roll", 9,
+                SCREEN_WIDTH/2 - 11, SCREEN_HEIGHT-2);
+            drawText(debugText, 3, 0, SCREEN_HEIGHT-1);
+            break;
+    }
 }
 
 function onInput(key) {
-    gameData.processInput(key);
+    switch (state) {
+        case STATE_LOGIN:
+            state = STATE_DOORS;
+            break;
+        case STATE_DOORS:
+            if (key == "1".charCodeAt(0)) {
+                state = STATE_SETTINGS;
+            }
+            break;
+        case STATE_SETTINGS:
+            keyChar = String.fromCharCode(key).toUpperCase();
+            if (keyChar == "S") {
+                state = STATE_GAME;
+            } else if (keyChar == "Q") {
+                state = STATE_DOORS;
+            }            
+            break;
+        case STATE_GAME:
+            gameData.processInput(key);
+            break;
+    }
 }
 
 function drawLogin() {
@@ -488,7 +526,31 @@ function drawLogin() {
                "           ~H║~F      SysOp:  Arch Vile~H      ║\n" +
                "           ╚═════════════════════════════╝";
 
-    util.draw(logo, 10, 0, 0);
+    util.draw(logo, 10, 0, 1);
+    util.draw("Press any key to log in...", 16, 1, SCREEN_HEIGHT-2);
+}
+
+function drawDoorsMenu() {
+    let menu = "~6╔════════════════════════════════════════════════════╗\n" +
+               "║                 ~GD O O R   G A M E S~6                ║\n" +
+               "╠═══════════════════════╦════════════════════════════╣\n" +
+               "║~A<~H1~A>~C...~HBowling Solitare~6 ║ ~CA game of solitare played~6  ║\n" +
+               "║                       ║ ~Cwith the rules of bowling.~6 ║\n" +
+               "║                       ║                            ║\n" +
+               "╚═══════════════════════╩════════════════════════════╝";
+    util.draw(menu, 6, 1, 5);
+    util.draw("Choose (1):_█_", 15, 1, SCREEN_HEIGHT-2);
+}
+
+function drawSettingsMenu() {
+    let menu = "(S)tart game\n" +
+               "(H)ints: ON\n" +
+               "(V)isible Trash Pile: OFF\n" +
+               "(P)layers: 1\n" +
+               "(Q)uit";
+
+    util.draw(menu, 16, 0, 0);
+    util.draw("Choose (S,H,V,P,Q):_█_", 15, 1, SCREEN_HEIGHT-2);
 }
 
 function drawHand() {
