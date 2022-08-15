@@ -17,18 +17,18 @@ var UnitTests = function() {
     this.assertEquals = function(expected, actual, message = "") {
         let passed = (expected === actual);
         if (passed) {
-            this.out('<div class="assert pass">' + message + ' Expected:[' + expected + ']===Actual:[' + actual + ']</div>');
+            this.out('<div class="assert pass">' + message + ' - Expected:[' + expected + ']===Actual:[' + actual + ']</div>');
         } else {
-            this.out('<div class="assert fail">' + message + ' Expected:[' + expected + ']===Actual:[' + actual + ']</div>');
+            this.out('<div class="assert fail">' + message + ' - Expected:[' + expected + ']===Actual:[' + actual + ']</div>');
         }
     };
 
     this.assertUndefined = function(actual, message = "") {
         let passed = (typeof actual === 'undefined');
         if (passed) {
-            this.out('<div class="assert pass">' + message + ' Expected:[undefined]===Actual:[' + actual + ']</div>');
+            this.out('<div class="assert pass">' + message + ' - Expected:[undefined]===Actual:[' + actual + ']</div>');
         } else {
-            this.out('<div class="assert fail">' + message + ' Expected:[undefined]===Actual:[' + actual + ']</div>');
+            this.out('<div class="assert fail">' + message + ' - Expected:[undefined]===Actual:[' + actual + ']</div>');
         }
     }
 

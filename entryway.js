@@ -559,6 +559,7 @@ function getFrameSymbols(frameData) {
     }
     if (frameData.first == 10) {
         result.first = 'X';
+        result.second = '';
         return result;
     } else if (frameData.first + frameData.second == 10) {
         result.second = '/';
@@ -624,18 +625,9 @@ function drawHandCard(pos, value, stackSize, available) {
         return;
     }
     let cardData = [
-        {
-            "label": "X",
-            "x": 0
-        },
-        {
-            "label": "Y",
-            "x": 8
-        },
-        {
-            "label": "Z",
-            "x": 16
-        }
+        {"label": "X", "x": 0},
+        {"label": "Y", "x": 8},
+        {"label": "Z", "x": 16}
     ];
     if (available) {
         value = "_" + value + "_";
