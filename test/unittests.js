@@ -6,6 +6,7 @@ var UnitTests = function() {
         this.testGetFrameScore();
         this.testPadString();
         this.testGetFrameSymbols();
+        this.testGetTotalScore();
 
         this.displayOutput();
     };
@@ -148,7 +149,18 @@ var UnitTests = function() {
 
         actual = getFrameSymbols({"first": 5, "second": "", "third": ""});
         this.assertEquals(5, actual.first, "5 should just be itself");
-    }
+    };
+
+    this.testGetTotalScore = function() {
+        this.out('<h3>testGetTotalScore</h3>');
+        let game = new GameData();
+        game.init();
+        game.scores = [
+            [10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0]
+        ];
+        game.frame = 10;
+        this.assertEquals(270, game.getTotalScore(0), "9 strikes (need to fix my scoring system)");
+    };
 
     this.knockDownPins = function(game, count) {
         for (let i=0; i<count; i++) {
