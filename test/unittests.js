@@ -128,9 +128,9 @@ var UnitTests = function() {
         ];
         game.frame = 5;
         game.roll = 0;
-        this.assertEquals(20, game.getFrameScore(1).total, "Strike followed by strike");
-        this.assertEquals(20, game.getFrameScore(2).total, "Strike followed by spare");
-        this.assertEquals(19, game.getFrameScore(3).total, "Strike followed by spare followed by 9");
+        this.assertEquals(29, game.getFrameScore(1).total, "Strike, strike, spare");
+        this.assertEquals(20, game.getFrameScore(2).total, "Strike, spare");
+        this.assertEquals(19, game.getFrameScore(3).total, "Spare, 9");
 
     };
 
@@ -144,8 +144,8 @@ var UnitTests = function() {
     this.testGetFrameSymbols = function() {
         this.out('<h3>testGetFrameSymbols</h3>');
         let actual = getFrameSymbols({"first": 10, "second": 0, "third": 0});
-        this.assertEquals('X', actual.first, "Strike is an X");
-        this.assertEquals('', actual.second, "Second roll of strike is a blank");
+        this.assertEquals('X', actual.second, "Strike is an X");
+        this.assertEquals('', actual.first, "First box of strike is a blank");
 
         actual = getFrameSymbols({"first": 5, "second": "", "third": ""});
         this.assertEquals(5, actual.first, "5 should just be itself");
@@ -156,10 +156,10 @@ var UnitTests = function() {
         let game = new GameData();
         game.init();
         game.scores = [
-            [10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0]
+            [10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 0,0]
         ];
         game.frame = 10;
-        this.assertEquals(270, game.getTotalScore(0), "9 strikes (need to fix my scoring system)");
+        this.assertEquals(240, game.getTotalScore(0), "9 strikes (need to fix my scoring system)");
     };
 
     this.knockDownPins = function(game, count) {

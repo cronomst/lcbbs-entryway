@@ -187,7 +187,8 @@ let GameData = function() {
 
     this.shuffleDeck = function() {
         for (let i=0; i<TOTAL_CARDS; i++) {
-            this.deck.push((i+1) % TOTAL_PINS);
+            this.deck.push(0);
+            //this.deck.push((i+1) % TOTAL_PINS);
         }
         for (let i=this.deck.length-1; i>0; i--) {
             let j = Math.floor(Math.random() * (i + 1));
@@ -347,7 +348,10 @@ let GameData = function() {
         }
         this.nextTurn();
         if (this.getPinsDown() == TOTAL_PINS) {
-            // TODO: Trigger strike/spare
+            // TODO: Trigger strike/spare screen
+            // TODO: Fix this because it won't work for strikes/spares on the 10th frame.
+            this.updateFrameScore();
+            this.nextFrame();
         }
         return true;
     };
@@ -373,6 +377,7 @@ let GameData = function() {
     };
 
     this.updateFrameScore = function() {
+        // TODO: Fix this logic because it can break on the 10th frame
         let p = this.player;
         let totalDownedPinCount = this.getPinsDown();
         let frameDownedPinCount = totalDownedPinCount;
@@ -416,8 +421,6 @@ let GameData = function() {
         let p = typeof player === 'undefined' ? this.player : player;
         let roll1 = this.scores[p][frameIndex*2];
         let roll2 = this.scores[p][frameIndex*2 + 1];
-        let nextFrameRoll1Index = (frameIndex+1)*2;
-        let nextFrameRoll2Index = (frameIndex+1)*2 + 1;
         if (this.frame > frameNum) {
             // frame in the past
             result.first = roll1;
@@ -427,9 +430,9 @@ let GameData = function() {
                 result.total = total;
             }
             if (result.first == 10 && frameNum + 1 < this.frame) {
-                result.total = 10 + this.scores[p][nextFrameRoll1Index] + this.scores[p][nextFrameRoll2Index]
+                result.total = 10 + this.getNextRollTotals(p, frameIndex * 2 + 1, 2);
             } else if (total == 10 && this.roll > 0) {
-                result.total = 10 + this.scores[p][nextFrameRoll1Index];
+                result.total = 10 + this.getNextRollTotals(p, frameIndex * 2 + 1, 1);
             }
         } else if (this.frame == frameNum) {
             // current frame
@@ -450,6 +453,22 @@ let GameData = function() {
             }
         }
         return runningTotal;
+    };
+
+    this.getNextRollTotals = function(player, start, rollCount) {
+        let pos = start + 1;
+        let total = 0;
+        while (rollCount > 0) {
+            if (this.scores[player][pos] === 10) {
+                pos+=2;
+                total+=10;
+            } else {
+                total+=this.scores[player][pos];
+                pos++;
+            }
+            rollCount--;
+        }
+        return total;
     };
 
 };
@@ -655,8 +674,8 @@ function getFrameSymbols(frameData) {
         "third": frameData.third
     }
     if (frameData.first == 10) {
-        result.first = 'X';
-        result.second = '';
+        result.first = '';
+        result.second = 'X';
         return result;
     } else if (frameData.first + frameData.second == 10) {
         result.second = '/';
