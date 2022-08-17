@@ -394,7 +394,15 @@ let GameData = function() {
         return totalDownedPinCount;
     };
 
-    this.getFrameScore = function(frameNum) {
+    /**
+     * Get score details for the given frame for the current player or
+     * for a specific player.
+     * 
+     * @param {int} frameNum frame number (1 indexed)
+     * @param {int} player player number. If not provided, defaults to current player
+     * @returns object containing first, second, third (if 10th frame), and total scores
+     */
+    this.getFrameScore = function(frameNum, player) {
         if (frameNum < 1 || frameNum > 10) {
             return false;
         }
@@ -405,7 +413,7 @@ let GameData = function() {
             "total": ""
         };
         let frameIndex = frameNum - 1;
-        let p = this.player;
+        let p = typeof player === 'undefined' ? this.player : player;
         let roll1 = this.scores[p][frameIndex*2];
         let roll2 = this.scores[p][frameIndex*2 + 1];
         let nextFrameRoll1Index = (frameIndex+1)*2;
@@ -433,11 +441,23 @@ let GameData = function() {
         return result;
     };
 
+    this.getTotalScore = function(player) {
+        let runningTotal = 0;
+        for (let i=1; i<=10; i++) {
+            let frameScore = this.getFrameScore(i, player);
+            if (frameScore.total !== "") {
+                runningTotal += frameScore.total;
+            }
+        }
+        return runningTotal;
+    };
+
 };
 
 let util = new TextUtil();
 let gameData = new GameData();
 let state = STATE_LOGIN;
+let options = {"hints": true, "visibleTrash": false, "players": 1};
 
 var debugText = "";
 
@@ -478,7 +498,7 @@ function onUpdate() {
             drawHand();
             drawPinCards();
             drawScore();
-            util.draw("Press ~FSPACE~9 to end roll", 9,
+            util.draw("Press <~FSPACE~9> to end roll", 9,
                 SCREEN_WIDTH/2 - 11, SCREEN_HEIGHT-2);
             drawText(debugText, 3, 0, SCREEN_HEIGHT-1);
             break;
@@ -496,16 +516,25 @@ function onInput(key) {
             }
             break;
         case STATE_SETTINGS:
-            keyChar = String.fromCharCode(key).toUpperCase();
-            if (keyChar == "S") {
-                state = STATE_GAME;
-            } else if (keyChar == "Q") {
-                state = STATE_DOORS;
-            }            
+            processSettingInput(key);
             break;
         case STATE_GAME:
             gameData.processInput(key);
             break;
+    }
+}
+
+function processSettingInput(key) {
+    keyChar = String.fromCharCode(key).toUpperCase();
+    if (keyChar == "S") { // Start game
+        state = STATE_GAME;
+    } else if (keyChar == "H") { // Hint toggle
+        options.hints = !options.hints;
+    } else if (keyChar == "V") { // Visible trash toggle
+        options.visibleTrash = !options.visibleTrash;
+    } else if (keyChar == "P") { // Player count toggle
+    } else if (keyChar == "Q") {
+        state = STATE_DOORS;
     }
 }
 
@@ -544,9 +573,9 @@ function drawDoorsMenu() {
 
 function drawSettingsMenu() {
     let menu = "(S)tart game\n" +
-               "(H)ints: ON\n" +
-               "(V)isible Trash Pile: OFF\n" +
-               "(P)layers: 1\n" +
+               "(H)ints: " + (options.hints ? "ON" : "OFF") + "\n" +
+               "(V)isible Trash Pile: " + (options.visibleTrash ? "ON" : "OFF") + "\n" +
+               "(P)layers: " + options.players + "\n" +
                "(Q)uit";
 
     util.draw(menu, 16, 0, 0);
@@ -574,43 +603,49 @@ function drawPinCards() {
 function drawScore() {
     let row = 3;
     let col = 1;
-    let initials = "P1";
-    let frameLeft;
-    let frameRight;
-    let box1 = " ";
-    let box2 = " ";
-    let box3 = " ";
-    let box4 = " ";
-    let frameScore1 = "   ";
-    let frameScore2 = "   ";
-    let frameData = gameData.getFrameScore(gameData.frame);
-    let prevFrameData = gameData.getFrameScore(gameData.frame-1);
-    let frameSymbols = getFrameSymbols(frameData);
-    let prevFrameSymbols = getFrameSymbols(prevFrameData);
+    let startFrame = gameData.frame < 4 ? 0 : gameData.frame - 3;
+    let endFrame = gameData.frame < 4 ? 2 : gameData.frame - 1;
+    drawFrameScores(startFrame, endFrame, row, col);
+}
 
+function drawFrameScores(minFrame, maxFrame, x, y) {
+    let player = 0;
+    let frameLeft = "   ╔\n" +
+                    "   ║\n" +
+                    "╔══╬\n" +
+                    "║  ║\n" +
+                    "║  ║\n" +
+                    "╚══╩";
+    let frameCenter = "═══╦\n" +
+                      "   ║\n" +
+                      "═╦═╬\n" +
+                      " ║ ║\n" +
+                      "   ║\n" +
+                      "═══╩";
+    let frameRight = "╗\n" +
+                     "║\n" +
+                     "╬═══╗\n" +
+                     "║   ║\n" +
+                     "║   ║\n" +
+                     "╩═══╝";
+    let frameWidth = (maxFrame - minFrame + 1) * 4;
+    util.draw(frameLeft, 15, x, y);
     
-    if (gameData.frame == 1) {
-        frameLeft = "~H1~F";
-        frameRight = "~52~F";
-        box1 = padString(frameSymbols.first, 1);
-        box2 = padString(frameSymbols.second, 1);
-    } else {
-        frameLeft = "~5" + (gameData.frame - 1) + "~F";
-        frameRight = "~H" + gameData.frame + "~F";
-        box1 = padString(prevFrameSymbols.first, 1);
-        box2 = padString(prevFrameSymbols.second, 1);
-        box3 = padString(frameSymbols.first, 1);
-        box4 = padString(frameSymbols.second, 1);
-        frameScore1 = padString(prevFrameData.total, 3);
-        frameScore2 = padString(frameData.total, 3);
+    for (let i=0; i<maxFrame - minFrame + 1; i++) {
+        let frameNum = (minFrame + i + 1).toString();
+        let frameData = gameData.getFrameScore(i + minFrame + 1, player);
+        let frameSymbols = getFrameSymbols(frameData);
+        // Frame border
+        util.draw(frameCenter, 15, x + (4*(i+1)), y);
+        // Frame number
+        util.draw(frameNum, frameNum == gameData.frame ? 17 : 5, x + (4*(i+1)+1), y+1);
+        // Scores
+        util.draw(frameSymbols.first.toString(), 15, x + (4*(i+1)), y+3);
+        util.draw(frameSymbols.second.toString(), 15, x + (4*(i+1)+2), y+3);
+        util.draw(padString(frameData.total,3), 15, x + (4*(i+1)), y+4);
     }
-    let frameSegment = "   ╔═══╦═══╗\n" +
-                       "   ║ " + frameLeft + " ║ " + frameRight + " ║\n" +
-                       "╔══╬═╦═╬═╦═╣\n" +
-                       "║" + initials + "║" + box1 + "║" + box2 + "║" + box3 + "║" + box4 + "║\n" +
-                       "║  ║" + frameScore1 + "║" + frameScore2 + "║\n" +
-                       "╚══╩═══╩═══╝";
-    util.draw(frameSegment, 15, col, row);
+    util.draw(frameRight, 15, x + frameWidth + 4 - 1, y);
+    util.draw(padString(gameData.getTotalScore(player), 3), 15, x + frameWidth + 4, y+4);
 }
 
 function getFrameSymbols(frameData) {

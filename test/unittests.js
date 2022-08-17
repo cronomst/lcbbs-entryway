@@ -121,6 +121,16 @@ var UnitTests = function() {
         actual = game.getFrameScore(0);
         this.assertEquals(false, actual, "Out of bounds frame score request should be false");
 
+        game.init();
+        game.scores = [
+            [10,0, 10,0, 9,1, 9,0]
+        ];
+        game.frame = 5;
+        game.roll = 0;
+        this.assertEquals(20, game.getFrameScore(1).total, "Strike followed by strike");
+        this.assertEquals(20, game.getFrameScore(2).total, "Strike followed by spare");
+        this.assertEquals(19, game.getFrameScore(3).total, "Strike followed by spare followed by 9");
+
     };
 
     this.testPadString = function() {
