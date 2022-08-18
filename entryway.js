@@ -477,12 +477,15 @@ let GameData = function() {
             return roll1;
         }
         if (roll1 == 10) {
-            return 10 + this.getRollSum(player, frameNum+1, totalRolls-1);
+            let sum = this.getRollSum(player, frameNum+1, totalRolls-1);
+            if (sum === false)
+                return false;
+            return 10 + sum;
         }
         if (roll2 === '') {
             return false;
         }
-        return roll1 + roll2 + this.getRollSum(player, frameNum + 1, totalRolls - 2);
+        return roll1 + roll2;
     };
 
     this.getScoreIndex = function(frame, roll) {

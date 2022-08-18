@@ -138,7 +138,7 @@ var UnitTests = function() {
         let game = new GameData();
         game.init();
         game.scores = [
-            [10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 10,0, 0,0]
+            [10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 0,0]
         ];
         game.frame = 10;
         this.assertEquals(240, game.getTotalScore(0), "9 strikes (need to fix my scoring system)");
@@ -154,6 +154,12 @@ var UnitTests = function() {
 
         this.assertEquals(9, game.getRollSum(0, 2, 2), "Frame 2, 2 rolls");
         this.assertEquals(20, game.getRollSum(0, 4, 2), "Frame 4, 2 rolls");
+
+        game.scores = [
+            [10,'', '','', '','', '','', '','']
+        ];
+
+        this.assertEquals(false, game.getRollSum(0, 1, 2), "Frame 1, 2 rolls");
     };
 
     this.knockDownPins = function(game, count) {
