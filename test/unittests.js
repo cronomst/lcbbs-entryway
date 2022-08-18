@@ -7,6 +7,7 @@ var UnitTests = function() {
         this.testPadString();
         this.testGetFrameSymbols();
         this.testGetTotalScore();
+        this.testGetRollSum();
 
         this.displayOutput();
     };
@@ -78,59 +79,40 @@ var UnitTests = function() {
     this.testGetFrameScore = function() {
         this.out('<h3>testGetFrameScore</h3>');
         let game = new GameData();
-        let actual;
         game.init();
         game.scores = [
-            [5,4, 10,0, 9,1, 1,0, 0,0]
+            [10,0, 5,4, 10,'', 10,'', 10,'', 0,0, 10,'', '','', '','']
         ];
-        actual = game.getFrameScore(1);
-        this.assertEquals("", actual.first, "No scores yet on first roll of first frame");
-        
-        game.nextRoll();
-        actual = game.getFrameScore(1);
-        this.assertEquals(5, actual.first, "Score set after first roll of first frame");
-        this.assertEquals("", actual.second, "No score yet on second of first frame");
 
-        game.nextRoll();
-        actual = game.getFrameScore(1);
-        this.assertEquals(5, actual.first, "Score set after first roll of first frame");
-        this.assertEquals(4, actual.second, "Score set after second roll of first frame");
-        this.assertEquals(9, actual.total, "End of first frame, so total is set");
-        actual = game.getFrameScore(2);
-        this.assertEquals("", actual.first, "No scores yet on first roll of second frame");
+        this.assertEquals(19, game.getFrameScore(0, 1).total, "Frame 1 total");
+        this.assertEquals(9, game.getFrameScore(0, 2).total, "Frame 2 total");
+        this.assertEquals(30, game.getFrameScore(0, 3).total, "Frame 3 total");
+        this.assertEquals(20, game.getFrameScore(0, 4).total, "Frame 4 total");
+        this.assertEquals(10, game.getFrameScore(0, 5).total, "Frame 5 total");
+        this.assertEquals(0, game.getFrameScore(0, 6).total, "Frame 6 total");
+        this.assertEquals('', game.getFrameScore(0, 7).total, "Frame 7 total");
 
-        game.roll = 0;
-        game.frame = 3;
-        actual = game.getFrameScore(2);
-        this.assertEquals(10, actual.first, "Strike, so first roll is 10");
-        this.assertEquals(0, actual.second, "Strike, so 0 for second roll");
-        this.assertEquals("", actual.total, "Get score for frame 2 strike while on beginning of frame 3, so no total yet");
-
-        game.frame = 4;
-        actual = game.getFrameScore(2);
-        this.assertEquals(20, actual.total, "Get score for frame 2 strike while on beginning of frame 4, so total available");
-
-        game.frame = 5;
-        actual = game.getFrameScore(3);
-        this.assertEquals("", actual.total, "Get score for frame 3 spare while on beginning of frame 4, so no total yet");
-        game.roll = 1;
-        actual = game.getFrameScore(3);
-        this.assertEquals(11, actual.total, "Get score for frame 3 spare while on 2nd roll of of frame 4, so total available");
-
-        game.frame = 1;
-        game.roll = 0;
-        actual = game.getFrameScore(0);
-        this.assertEquals(false, actual, "Out of bounds frame score request should be false");
-
-        game.init();
         game.scores = [
-            [10,0, 10,0, 9,1, 9,0]
+            [1,0, 10,'', 1,2, '','', '','', '','', '','', '','', '','']
         ];
-        game.frame = 5;
-        game.roll = 0;
-        this.assertEquals(29, game.getFrameScore(1).total, "Strike, strike, spare");
-        this.assertEquals(20, game.getFrameScore(2).total, "Strike, spare");
-        this.assertEquals(19, game.getFrameScore(3).total, "Spare, 9");
+        this.assertEquals(1, game.getFrameScore(0, 1).total, "Frame 1 total");
+        this.assertEquals(13, game.getFrameScore(0, 2).total, "Frame 2 total");
+        this.assertEquals(3, game.getFrameScore(0, 3).total, "Frame 3 total");
+
+        game.scores = [
+            [1,0, 10,'', 3,0, 10,'', 10,'', 10,'', '','', '','', '','']
+        ];
+        this.assertEquals(1, game.getFrameScore(0, 1).total, "Frame 1 total");
+        this.assertEquals(13, game.getFrameScore(0, 2).total, "Frame 2 total");
+        this.assertEquals(3, game.getFrameScore(0, 3).total, "Frame 3 total");
+        this.assertEquals(30, game.getFrameScore(0, 4).total, "Frame 4 total");
+
+        game.scores = [
+            [10,'', 10,'', '','', '','', '','', '','', '','', '','', '','']
+        ];
+        this.assertEquals('', game.getFrameScore(0, 1).total, "Frame 1 total");
+        this.assertEquals('', game.getFrameScore(0, 2).total, "Frame 2 total");
+        this.assertEquals('', game.getFrameScore(0, 3).total, "Frame 3 total");
 
     };
 
@@ -160,6 +142,18 @@ var UnitTests = function() {
         ];
         game.frame = 10;
         this.assertEquals(240, game.getTotalScore(0), "9 strikes (need to fix my scoring system)");
+    };
+
+    this.testGetRollSum = function() {
+        this.out('<h3>testGetRollSum</h3>');
+        let game = new GameData();
+        game.init();
+        game.scores = [
+            [10,0, 5,4, 10,'', 10,'', 10,'', 0,0, 10,'', '','', '','']
+        ];
+
+        this.assertEquals(9, game.getRollSum(0, 2, 2), "Frame 2, 2 rolls");
+        this.assertEquals(20, game.getRollSum(0, 4, 2), "Frame 4, 2 rolls");
     };
 
     this.knockDownPins = function(game, count) {
