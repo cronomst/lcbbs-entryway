@@ -191,8 +191,8 @@ let GameData = function() {
 
     this.shuffleDeck = function() {
         for (let i=0; i<TOTAL_CARDS; i++) {
-            this.deck.push(0);
-            //this.deck.push((i+1) % TOTAL_PINS);
+            //this.deck.push(0);
+            this.deck.push((i+1) % TOTAL_PINS);
         }
         for (let i=this.deck.length-1; i>0; i--) {
             let j = Math.floor(Math.random() * (i + 1));
@@ -403,9 +403,11 @@ let GameData = function() {
         return totalDownedPinCount;
     };
 
-    this.getTotalScore = function(player) {
+    this.getTotalScore = function(player, frameNum) {
+        if (!frameNum)
+            frameNum = 10;
         let runningTotal = 0;
-        for (let i=1; i<=10; i++) {
+        for (let i=1; i<=frameNum; i++) {
             let frameScore = this.getFrameScore(player, i);
             if (frameScore.total !== '') {
                 runningTotal += frameScore.total;
@@ -674,6 +676,7 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
         let frameNum = (minFrame + i + 1).toString();
         let frameData = gameData.getFrameScore(player, i + minFrame + 1);
         let frameSymbols = getFrameSymbols(frameData);
+        let frameTotal = frameData.total !== '' ? gameData.getTotalScore(player, i + minFrame + 1) : '';
         // Frame border
         util.draw(frameCenter, 15, x + (4*(i+1)), y);
         // Frame number
@@ -681,7 +684,7 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
         // Scores
         util.draw(frameSymbols.first.toString(), 15, x + (4*(i+1)), y+3);
         util.draw(frameSymbols.second.toString(), 15, x + (4*(i+1)+2), y+3);
-        util.draw(padString(frameData.total,3), 15, x + (4*(i+1)), y+4);
+        util.draw(padString(frameTotal,3), 15, x + (4*(i+1)), y+4);
     }
     debugText = gameData.scores[0].toString();
     util.draw(frameRight, 15, x + frameWidth + 4 - 1, y);
