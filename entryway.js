@@ -346,8 +346,11 @@ let GameData = function() {
         if (this.hand[handPos][0] !== this.getSelectedPinSum()) {
             return false;
         }
+        this.deck.push(this.hand[handPos][0]); // Add to deck for keeping track of trash
+
         let playedCard = this.hand[handPos].shift();
         for (let i=0; i<this.selectedPins.length; i++) {
+            this.deck.push(this.pins[this.selectedPins[i]].value); // Add to deck for keeping track of trash
             this.pins[this.selectedPins[i]].value = -1;
         }
         this.nextTurn();
@@ -508,7 +511,7 @@ const STATE_GAME = 3;
 let util = new TextUtil();
 let gameData = new GameData();
 let state = STATE_LOGIN;
-let options = {"hints": true, "visibleTrash": false, "players": 1};
+let options = {"showHints": true, "visibleTrash": false, "players": 1};
 
 var debugText = "";
 
@@ -517,6 +520,7 @@ function getName() {
 }
 
 function onConnect() {
+    loadOptions();
     util.setBlinkSpeed(1);
     gameData.init();
     state = STATE_LOGIN;
@@ -539,6 +543,7 @@ function onUpdate() {
             drawHand();
             drawPinCards();
             drawScore();
+            drawTrash();
             util.draw("Press <~FSPACE~9> to end roll", 9,
                 SCREEN_WIDTH/2 - 11, SCREEN_HEIGHT-2);
             drawText(debugText, 3, 0, SCREEN_HEIGHT-1);
@@ -570,9 +575,11 @@ function processSettingInput(key) {
     if (keyChar == "S") { // Start game
         state = STATE_GAME;
     } else if (keyChar == "H") { // Hint toggle
-        options.hints = !options.hints;
+        options.showHints = !options.showHints;
+        saveData(JSON.stringify(options));
     } else if (keyChar == "V") { // Visible trash toggle
         options.visibleTrash = !options.visibleTrash;
+        saveData(JSON.stringify(options));
     } else if (keyChar == "P") { // Player count toggle
     } else if (keyChar == "Q") {
         state = STATE_DOORS;
@@ -614,7 +621,7 @@ function drawDoorsMenu() {
 
 function drawSettingsMenu() {
     let menu = "(S)tart game\n" +
-               "(H)ints: " + (options.hints ? "ON" : "OFF") + "\n" +
+               "(H)ints: " + (options.showHints ? "ON" : "OFF") + "\n" +
                "(V)isible Trash Pile: " + (options.visibleTrash ? "ON" : "OFF") + "\n" +
                "(P)layers: " + options.players + "\n" +
                "(Q)uit";
@@ -716,6 +723,16 @@ function getFrameSymbols(frameData) {
     return result;
 }
 
+function drawNote() {
+    let noteText = "I started The Entryway BBS the summer before my sophomore year of high " +
+               "school. I thought it would be a fun project and a way to distribute the " +
+               "games I made. My favorite BBS feature was the door games, though. " +
+               "Somewhere, I discovered a game called \"Bowling Solitaire\" that was an " +
+               "interesting diversion from the usual role-playing and space trading, so I " +
+               "included it on The Entryway.";
+    drawTextWrapped(noteText, 13, 1, 1, SCREEN_WIDTH-2);
+}
+
 
 /**
  * Pin position numbers
@@ -769,7 +786,7 @@ function drawHandCard(pos, value, stackSize, available) {
         {"label": "Y", "x": 8},
         {"label": "Z", "x": 16}
     ];
-    if (available) {
+    if (available && options.showHints) {
         value = "_" + value + "_";
     }
     let row = 12;
@@ -786,6 +803,19 @@ function drawHandCard(pos, value, stackSize, available) {
         drawText(cardMiddle, color, card.x + col, row + i + 2);
     }
     drawText(cardBottom, color, card.x + col, row + stackSize + 1);
+}
+
+function drawTrash() {
+    if (options.visibleTrash) {
+        drawText("Trash [" + gameData.deck.toString() + "]", 8, 0, 0);
+    }
+}
+
+function loadOptions() {
+    let data = loadData();
+    if (data != false) {
+        options = JSON.parse(data);
+    }
 }
 
 function padString(value, padding) {

@@ -141,7 +141,7 @@ var UnitTests = function() {
             [10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 0,0]
         ];
         game.frame = 10;
-        this.assertEquals(240, game.getTotalScore(0), "9 strikes (need to fix my scoring system)");
+        this.assertEquals(240, game.getTotalScore(0), "9 strikes");
     };
 
     this.testGetRollSum = function() {
