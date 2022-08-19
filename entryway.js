@@ -611,7 +611,7 @@ function drawDoorsMenu() {
     let menu = "~6╔════════════════════════════════════════════════════╗\n" +
                "║                 ~GD O O R   G A M E S~6                ║\n" +
                "╠═══════════════════════╦════════════════════════════╣\n" +
-               "║~A<~H1~A>~C...~HBowling Solitare~6 ║ ~CA game of solitare played~6  ║\n" +
+               "║~A<~H1~A>~C ~HBowling Solitaire~6  ║ ~CA game of solitaire played~6 ║\n" +
                "║                       ║ ~Cwith the rules of bowling.~6 ║\n" +
                "║                       ║                            ║\n" +
                "╚═══════════════════════╩════════════════════════════╝";
