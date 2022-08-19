@@ -576,10 +576,10 @@ function processSettingInput(key) {
         state = STATE_GAME;
     } else if (keyChar == "H") { // Hint toggle
         options.showHints = !options.showHints;
-        saveData(JSON.stringify(options));
+        //saveData(JSON.stringify(options));
     } else if (keyChar == "V") { // Visible trash toggle
         options.visibleTrash = !options.visibleTrash;
-        saveData(JSON.stringify(options));
+        //saveData(JSON.stringify(options));
     } else if (keyChar == "P") { // Player count toggle
     } else if (keyChar == "Q") {
         state = STATE_DOORS;
@@ -601,6 +601,7 @@ function drawLogin() {
                " ██     ██                                 ██    ██\n" +
                " ██████    ~H╔═════════════════════════════╗~B       ██\n" +
                "           ~H║~F      SysOp:  Arch Vile~H      ║\n" +
+               "           ~H║~9       Winter Park, FL~H       ║\n" +
                "           ╚═════════════════════════════╝";
 
     util.draw(logo, 10, 0, 1);
@@ -620,13 +621,14 @@ function drawDoorsMenu() {
 }
 
 function drawSettingsMenu() {
-    let menu = "(S)tart game\n" +
+    let menu = "B O W L I N G   S O L I T A I R E\n\n" + 
+               "(S)tart Game\n" +
                "(H)ints: " + (options.showHints ? "ON" : "OFF") + "\n" +
                "(V)isible Trash Pile: " + (options.visibleTrash ? "ON" : "OFF") + "\n" +
                "(P)layers: " + options.players + "\n" +
                "(Q)uit";
 
-    util.draw(menu, 16, 0, 0);
+    util.draw(menu, 16, 1, 0);
     util.draw("Choose (S,H,V,P,Q):_█_", 15, 1, SCREEN_HEIGHT-2);
 }
 
