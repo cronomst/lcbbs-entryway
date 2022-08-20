@@ -7,7 +7,6 @@ var UnitTests = function() {
         this.testPadString();
         this.testGetFrameSymbols();
         this.testGetTotalScore();
-        this.testGetRollSum();
         this.testDerivedFramePrototype();
 
         this.displayOutput();
@@ -139,28 +138,10 @@ var UnitTests = function() {
         let game = new GameData();
         game.init();
         game.scores = [
-            [10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 10,'', 0,0]
+            [10, 10, 10, 10, 10, 10, 10, 10, 10, 0,0]
         ];
         game.frame = 10;
         this.assertEquals(240, game.getTotalScore(0), "9 strikes");
-    };
-
-    this.testGetRollSum = function() {
-        this.out('<h3>testGetRollSum</h3>');
-        let game = new GameData();
-        game.init();
-        game.scores = [
-            [10,0, 5,4, 10,'', 10,'', 10,'', 0,0, 10,'', '','', '','']
-        ];
-
-        this.assertEquals(9, game.getRollSum(0, 2, 2), "Frame 2, 2 rolls");
-        this.assertEquals(20, game.getRollSum(0, 4, 2), "Frame 4, 2 rolls");
-
-        game.scores = [
-            [10,'', '','', '','', '','', '','']
-        ];
-
-        this.assertEquals(false, game.getRollSum(0, 1, 2), "Frame 1, 2 rolls");
     };
 
     this.testDerivedFramePrototype = function() {
@@ -193,26 +174,26 @@ var UnitTests = function() {
         scores = [10, 5];
         this.assertEquals(false, this.getFrameScores(scores, [])[0], "Frame 1 score");
         scores = [10, 5,2];
-        this.assertEquals(17, this.getFrameScores(scores, [])[0], "Frame 1 score");
-        this.assertEquals(7, this.getFrameScores(scores, [])[1], "Frame 2 score");
+        this.assertEquals(17, this.getFrameScores(scores, [])[0].total, "Frame 1 score");
+        this.assertEquals(7, this.getFrameScores(scores, [])[1].total, "Frame 2 score");
         scores = [0,10, 5];
-        this.assertEquals(15, this.getFrameScores(scores, [])[0], "Frame 1 score");
+        this.assertEquals(15, this.getFrameScores(scores, [])[0].total, "Frame 1 score");
         scores = [0,9];
-        this.assertEquals(9, this.getFrameScores(scores, [])[0], "Frame 1 score");
+        this.assertEquals(9, this.getFrameScores(scores, [])[0].total, "Frame 1 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10];
-        this.assertEquals(30, this.getFrameScores(scores, [])[6], "Frame 7 score");
+        this.assertEquals(30, this.getFrameScores(scores, [])[6].total, "Frame 7 score");
         this.assertEquals(false, this.getFrameScores(scores, [])[7], "Frame 8 score");
         this.assertEquals(false, this.getFrameScores(scores, [])[8], "Frame 9 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 5,4];
-        this.assertEquals(9, this.getFrameScores(scores, [])[9], "Frame 10 score");
+        this.assertEquals(9, this.getFrameScores(scores, [])[9].total, "Frame 10 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 10,10,10];
-        this.assertEquals(30, this.getFrameScores(scores, [])[9], "Frame 10 score");
+        this.assertEquals(30, this.getFrameScores(scores, [])[9].total, "Frame 10 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 10,9,1];
-        this.assertEquals(20, this.getFrameScores(scores, [])[9], "Frame 10 score");
+        this.assertEquals(20, this.getFrameScores(scores, [])[9].total, "Frame 10 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 9,1,5];
-        this.assertEquals(15, this.getFrameScores(scores, [])[9], "Frame 10 score");
+        this.assertEquals(15, this.getFrameScores(scores, [])[9].total, "Frame 10 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 9,1,10];
-        this.assertEquals(20, this.getFrameScores(scores, [])[9], "Frame 10 score");
+        this.assertEquals(20, this.getFrameScores(scores, [])[9].total, "Frame 10 score");
 
         scores = [];
         isNextFrame = this.updateRoll(scores, 1);
@@ -236,65 +217,21 @@ var UnitTests = function() {
     };
     
     this.getCurrentFrame = function(scores, i, frame, roll) {
-        if (i == scores.length) {
-            return {"frame": frame, "roll": roll};
-        }
-        if (scores[i] == 10 && roll === 0 && frame < 10)
-            return this.getCurrentFrame(scores, i+1, frame+1, 0);
-        if (roll == 1 && frame < 10)
-            return this.getCurrentFrame(scores, i+1, frame+1, 0);
-        return this.getCurrentFrame(scores, i+1, frame, roll+1);
+        let game = new GameData();
+        game.init();
+        return game.getCurrentFrame(scores, i, frame, roll);
     };
 
     this.getFrameScores = function(scores, frameScores) {
-        let frame = 0;
-        let roll = 0;
-        for (let i=0; i<scores.length; i++) {
-            if (frame == 9) {
-                let r1 = i+1 < scores.length ? scores[i+1] : 0;
-                let r2 = i+2 < scores.length ? scores[i+2] : 0;
-                frameScores[frame] = scores[i] + r1 + r2;
-                return frameScores;
-            }
-            if (scores[i] == 10 && roll === 0 && frame < 9) {
-                let r1 = i+1 < scores.length ? scores[i+1] : false;
-                let r2 = i+2 < scores.length ? scores[i+2] : false;
-                if (r1 !== false && r2 !== false) {
-                    frameScores[frame] = 10 + r1 + r2;
-                } else {
-                    frameScores[frame] = false;
-                }
-                frame++;
-                roll = 0;
-            } else if (roll == 1 && frame < 9) {
-                if (scores[i] + scores[i-1] == 10) {
-                    let r1 = i+1 < scores.length ? scores[i+1] : false;
-                    if (r1 !== false) {
-                        frameScores[frame] = 10 + r1;
-                    } else {
-                        frameScores[frame] = false;
-                    }
-                } else {
-                    frameScores[frame] = scores[i] + scores[i-1];
-                }
-                frame++;
-                roll = 0;
-            } else {
-                roll++;
-            }
-        }
-        return frameScores;
+        let game = new GameData();
+        game.init();
+        return game.getFrameScores(scores, frameScores);
     };
 
     this.updateRoll = function(scores, value) {
-        let frameData = this.getCurrentFrame(scores, 0, 1, 0);
-        scores.push(value);
-        if (frameData.frame < 10) {
-            if (frameData.roll == 1 || value == 10) {
-                return true;
-            }
-        }
-        return false;
+        let game = new GameData();
+        game.init();
+        return game.updateRoll(scores, value);
     };
 
     this.knockDownPins = function(game, count) {

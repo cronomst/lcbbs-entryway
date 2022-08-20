@@ -166,13 +166,12 @@ let GameData = function() {
     this.turn = 0;
     this.roll = 0;
     this.frame = 0;
+    this.prevPinsDown = false;
+    this.frameScores = [];
     
     this.init = function() {
         this.scores = [[],[]];
-        for (let i=0; i<21; i++) {
-            this.scores[0].push('');
-            this.scores[1].push('');
-        }
+        this.frameScores = [];
         this.nextFrame();
         this.updateAvailable();
     };
@@ -185,14 +184,15 @@ let GameData = function() {
         this.selectedPins = [];
         this.turn = 0;
         this.roll = 0;
+        this.prevPinsDown = false;
         this.shuffleDeck();
         this.drawCards();
     };
 
     this.shuffleDeck = function() {
         for (let i=0; i<TOTAL_CARDS; i++) {
-            //this.deck.push(0);
-            this.deck.push((i+1) % TOTAL_PINS);
+            this.deck.push(0);
+            //this.deck.push((i+1) % TOTAL_PINS);
         }
         for (let i=this.deck.length-1; i>0; i--) {
             let j = Math.floor(Math.random() * (i + 1));
@@ -401,21 +401,100 @@ let GameData = function() {
 
     this.endGame = function() {
         // TODO: Implement end of game logic
-    }
+    };
+
+    this.getFrame = function(scores) {
+        return this.getCurrentFrame(scores, 0, 1, 0);
+    };
+
+    this.getCurrentFrame = function(scores, i, frame, roll) {
+        if (i == scores.length) {
+            return {"frame": frame, "roll": roll};
+        }
+        if (scores[i] == 10 && roll === 0 && frame < 10)
+            return this.getCurrentFrame(scores, i+1, frame+1, 0);
+        if (roll == 1 && frame < 10)
+            return this.getCurrentFrame(scores, i+1, frame+1, 0);
+        return this.getCurrentFrame(scores, i+1, frame, roll+1);
+    };
+
+    this.updateRoll = function(scores, value) {
+        let frameData = this.getCurrentFrame(scores, 0, 1, 0);
+        scores.push(value);
+        if (frameData.frame < 10) {
+            if (frameData.roll == 1 || value == 10) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    this.getFrameScores = function(scores) {
+        let frame = 0;
+        let roll = 0;
+        let frameScores = [];
+        for (let i=0; i<scores.length; i++) {
+            if (frame == 9) {
+                let r1 = i+1 < scores.length ? scores[i+1] : 0;
+                let r2 = i+2 < scores.length ? scores[i+2] : 0;
+                frameScores[frame] = {
+                    'rolls': [scores[i], r1, r2],
+                    'total': scores[i] + r1 + r2
+                };
+                return frameScores;
+            }
+            if (scores[i] == 10 && roll === 0 && frame < 9) {
+                let r1 = i+1 < scores.length ? scores[i+1] : false;
+                let r2 = i+2 < scores.length ? scores[i+2] : false;
+                if (r1 !== false && r2 !== false) {
+                    frameScores[frame] = {
+                        'rolls': [10],
+                        'total': 10 + r1 + r2
+                    };
+                } else {
+                    frameScores[frame] = false;
+                }
+                frame++;
+                roll = 0;
+            } else if (roll == 1 && frame < 9) {
+                if (scores[i] + scores[i-1] == 10) {
+                    let r1 = i+1 < scores.length ? scores[i+1] : false;
+                    if (r1 !== false) {
+                        frameScores[frame] = {
+                            'rolls': [scores[i-1], scores[i]],
+                            'total': 10 + r1
+                        };
+                    } else {
+                        frameScores[frame] = false;
+                    }
+                } else {
+                    frameScores[frame] = {
+                        'rolls': [scores[i-1], scores[i]],
+                        'total': scores[i] + scores[i-1]
+                    };
+                }
+                frame++;
+                roll = 0;
+            } else {
+                roll++;
+            }
+        }
+        return frameScores;
+    };
 
     this.updateFrameScore = function() {
         let p = this.player;
         let totalDownedPinCount = this.getPinsDown();
-        let frameDownedPinCount = totalDownedPinCount;
-        let scoreRollIndex = (this.frame-1) * 2 + this.roll;
-
-        // TODO: Does not handle frame 10 correctly when the first roll is a strike
-        if (this.roll == 1) {
-            frameDownedPinCount -= this.scores[p][scoreRollIndex-1];
-        } else if (this.roll == 2) {
-            frameDownedPinCount -= this.scores[p][scoreRollIndex-1] + this.scores[p][scoreRollIndex-2];
+        
+        if (this.prevPinsDown === false) {
+            if (totalDownedPinCount < 10)
+                this.prevPinsDown = totalDownedPinCount;
+            this.updateRoll(this.scores[p], totalDownedPinCount);
+        } else {
+            this.updateRoll(this.scores[p], totalDownedPinCount - this.prevPinsDown);
+            this.prevPinsDown = false;
         }
-        this.scores[p][scoreRollIndex] = frameDownedPinCount;
+        this.frameScores = this.getFrameScores(this.scores[p])
     };
 
     this.getPinsDown = function() {
@@ -432,29 +511,14 @@ let GameData = function() {
         if (!frameNum)
             frameNum = 10;
         let runningTotal = 0;
-        for (let i=1; i<=frameNum; i++) {
-            let frameScore = this.getFrameScore(player, i);
-            if (frameScore.total !== '') {
+        let scores = this.getFrameScores(this.scores[player], []);
+        for (let i=1; i<=frameNum && i-1 < scores.length; i++) {
+            let frameScore = scores[i-1];
+            if (frameScore !== false) {
                 runningTotal += frameScore.total;
             }
         }
         return runningTotal;
-    };
-
-    this.getNextRollTotals = function(player, start, rollCount) {
-        let pos = start + 1;
-        let total = 0;
-        while (rollCount > 0) {
-            if (this.scores[player][pos] === 10) {
-                pos+=2;
-                total+=10;
-            } else {
-                total+=this.scores[player][pos];
-                pos++;
-            }
-            rollCount--;
-        }
-        return total;
     };
 
     this.getFrameScore = function(player, frameNum) {
@@ -462,62 +526,27 @@ let GameData = function() {
             return false;
         }
         let result = {
-            "first": this.scores[player][this.getScoreIndex(frameNum, 0)],
-            "second": this.scores[player][this.getScoreIndex(frameNum, 1)],
-            "third": "",
-            "total": ""
+            "first": '',
+            "second": '',
+            "third": '',
+            "total": ''
         };
-        if (frameNum == 10) {
-            result.third = this.scores[player][this.getScoreIndex(frameNum, 2)];
-        }
-        if (result.first == 10) {
-            result.second = 0;
-        }
-        if (result.first !== '' && result.second !== '') {
-            let sum = result.first + result.second;
-            if (result.first == 10) {
-                let strikeSum = this.getRollSum(player, frameNum + 1, 2);
-                if (strikeSum !== false)
-                    result.total = sum + strikeSum;
-            } else if (sum == 10) {
-                let spareSum = this.getRollSum(player, frameNum + 1, 1);
-                if (spareSum !== false)
-                    result.total = sum + spareSum;
-            } else {
-                result.total = sum;
+        this.frameScores = this.getFrameScores(this.scores[player]);
+        if (frameNum-1 < this.frameScores.length) {
+            let fs = this.frameScores[frameNum-1];
+            if (fs === false) {
+                return result;
             }
+            if (fs.rolls.length > 0)
+                result.first = fs.rolls[0];
+            if (fs.rolls.length > 1)
+                result.second = fs.rolls[1];
+            if (fs.rolls.length > 2)
+                result.third = fs.rolls[2];
+            total = this.getTotalScore(player, frameNum);
         }
         return result;
     };
-
-    this.getRollSum = function(player, frameNum, totalRolls) {
-        if (frameNum < 1 || frameNum > 10 || totalRolls <= 0) {
-            return false;
-        }
-        let roll1 = this.scores[player][this.getScoreIndex(frameNum, 0)];
-        let roll2 = this.scores[player][this.getScoreIndex(frameNum, 1)];
-
-        if (roll1 === '') { 
-            return false;
-        }
-        if (totalRolls == 1) {
-            return roll1;
-        }
-        if (roll1 == 10) {
-            let sum = this.getRollSum(player, frameNum+1, totalRolls-1);
-            if (sum === false)
-                return false;
-            return 10 + sum;
-        }
-        if (roll2 === '') {
-            return false;
-        }
-        return roll1 + roll2;
-    };
-
-    this.getScoreIndex = function(frame, roll) {
-        return (frame-1) * 2 + roll;
-    }
 
 };
 
@@ -707,7 +736,7 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
         let frameNum = (minFrame + i + 1).toString();
         let frameData = gameData.getFrameScore(player, i + minFrame + 1);
         let frameSymbols = getFrameSymbols(frameData, frameNum);
-        let frameTotal = frameData.total !== '' ? gameData.getTotalScore(player, i + minFrame + 1) : '';
+        let frameTotal = frameData.total !== false ? gameData.getTotalScore(player, i + minFrame + 1) : '';
         // Frame border
         util.draw(frameCenter, 15, x + (4*(i+1)), y);
         if (frameNum == 10) {
