@@ -434,7 +434,10 @@ let GameData = function() {
         let roll = 0;
         let frameScores = [];
         for (let i=0; i<scores.length; i++) {
-            frameScores[frame] = {'rolls': [], 'total': false};
+            frameScores[frame] = {
+                'rolls': [],
+                'total': false
+            };
             if (frame == 9) {
                 let r1 = i+1 < scores.length ? scores[i+1] : 0;
                 let r2 = i+2 < scores.length ? scores[i+2] : 0;
@@ -518,14 +521,23 @@ let GameData = function() {
     };
 
     this.getTotalScore = function(player, frameNum) {
-        if (!frameNum)
+        let frameScores = this.getFrameScores(this.scores[player], []);
+        let isGameTotal = false;
+        if (!frameNum) {
             frameNum = 10;
+            isGameTotal = true;
+        } else if (frameNum-1 >= frameScores.length) {
+            // Attemping to get a score for a frame that is not completed yet
+            return false;
+        }
         let runningTotal = 0;
-        let scores = this.getFrameScores(this.scores[player], []);
-        for (let i=1; i<=frameNum && i-1 < scores.length; i++) {
-            let frameScore = scores[i-1];
-            if (frameScore !== false) {
-                runningTotal += frameScore.total;
+        for (let i=1; i<=frameNum && i-1 < frameScores.length; i++) {
+            let fs = frameScores[i-1];
+            if (fs !== false && fs.total !== false) {
+                runningTotal += fs.total;
+            } else {
+                if (isGameTotal == false)
+                    return false;
             }
         }
         return runningTotal;
@@ -539,7 +551,7 @@ let GameData = function() {
             "first": '',
             "second": '',
             "third": '',
-            "total": ''
+            "total": false
         };
         this.frameScores = this.getFrameScores(this.scores[player]);
         if (frameNum-1 < this.frameScores.length) {
@@ -553,7 +565,7 @@ let GameData = function() {
                 result.second = fs.rolls[1];
             if (fs.rolls.length > 2)
                 result.third = fs.rolls[2];
-            total = this.getTotalScore(player, frameNum);
+            result.total = this.getTotalScore(player, frameNum);
         }
         return result;
     };
@@ -764,12 +776,13 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
         util.draw(padString(frameTotal,3), 15, x + (4*(i+1)), y+4);
     }
     debugText = gameData.scores[0].toString();
+    let runningTotal = gameData.getTotalScore(player);
     if (maxFrame == 9) {
         util.draw(frameRight, 15, x + frameWidth + 4 - 1 + 2, y);
-        util.draw(padString(gameData.getTotalScore(player), 3), 15, x + frameWidth + 4 + 2, y+4);
+        util.draw(padString(runningTotal !== false ? runningTotal : '0'), 3, 15, x + frameWidth + 4 + 2, y+4);
     } else {
         util.draw(frameRight, 15, x + frameWidth + 4 - 1, y);
-        util.draw(padString(gameData.getTotalScore(player), 3), 15, x + frameWidth + 4, y+4);
+        util.draw(padString(runningTotal !== false ? runningTotal : '0', 3), 15, x + frameWidth + 4, y+4);
     }
 }
 

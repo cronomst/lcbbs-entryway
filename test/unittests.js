@@ -142,6 +142,10 @@ var UnitTests = function() {
         ];
         game.frame = 10;
         this.assertEquals(240, game.getTotalScore(0), "9 strikes");
+
+        game.scores = [[5]];
+        this.assertEquals(false, game.getTotalScore(0,1), "Get total score for frame 1 before complete");
+        this.assertEquals(0, game.getTotalScore(0), "Get game total score");
     };
 
     this.testDerivedFramePrototype = function() {
@@ -202,6 +206,9 @@ var UnitTests = function() {
         this.assertEquals(false, game.getFrameScores(scores)[0].total, "Frame 1 total");
         this.assertEquals(9, this.getFrameScores(scores)[0].rolls[0], "Frame 1 roll 1");
         this.assertEquals(1, this.getFrameScores(scores)[0].rolls[1], "Frame 1 roll 2");
+        scores = [5];
+        this.assertEquals(false, game.getFrameScores(scores)[0].total, "[5] Frame 1 total");
+        this.assertEquals(5, this.getFrameScores(scores)[0].rolls[0], "[5] Frame 1 roll 1");
 
         scores = [];
         isNextFrame = this.updateRoll(scores, 1);
