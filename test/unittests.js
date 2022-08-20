@@ -146,6 +146,8 @@ var UnitTests = function() {
 
     this.testDerivedFramePrototype = function() {
         this.out('<h3>testDerivedFramePrototype</h3>');
+        let game = new GameData();
+        game.init();
         let scores = [];
         // Methods I would need:
         // - get current frame and roll - done
@@ -170,30 +172,36 @@ var UnitTests = function() {
         this.assertEquals(3, this.getCurrentFrame(scores, 0, 1, 0).roll, "Roll");
 
         scores = [10];
-        this.assertEquals(false, this.getFrameScores(scores, [])[0], "Frame 1 score");
+        this.assertEquals(false, this.getFrameScores(scores)[0].total, "Frame 1 score");
         scores = [10, 5];
-        this.assertEquals(false, this.getFrameScores(scores, [])[0], "Frame 1 score");
+        this.assertEquals(false, this.getFrameScores(scores)[0].total, "Frame 1 score");
+        this.assertEquals(5, this.getFrameScores(scores)[1].rolls[0], "Frame 2 rolls");
+        this.assertEquals(false, this.getFrameScores(scores)[1].total, "Frame 2 total");
         scores = [10, 5,2];
-        this.assertEquals(17, this.getFrameScores(scores, [])[0].total, "Frame 1 score");
-        this.assertEquals(7, this.getFrameScores(scores, [])[1].total, "Frame 2 score");
+        this.assertEquals(17, this.getFrameScores(scores)[0].total, "Frame 1 score");
+        this.assertEquals(7, this.getFrameScores(scores)[1].total, "Frame 2 score");
         scores = [0,10, 5];
-        this.assertEquals(15, this.getFrameScores(scores, [])[0].total, "Frame 1 score");
+        this.assertEquals(15, this.getFrameScores(scores)[0].total, "Frame 1 score");
         scores = [0,9];
-        this.assertEquals(9, this.getFrameScores(scores, [])[0].total, "Frame 1 score");
+        this.assertEquals(9, this.getFrameScores(scores)[0].total, "Frame 1 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10];
-        this.assertEquals(30, this.getFrameScores(scores, [])[6].total, "Frame 7 score");
-        this.assertEquals(false, this.getFrameScores(scores, [])[7], "Frame 8 score");
-        this.assertEquals(false, this.getFrameScores(scores, [])[8], "Frame 9 score");
+        this.assertEquals(30, this.getFrameScores(scores)[6].total, "Frame 7 score");
+        this.assertEquals(false, this.getFrameScores(scores)[7].total, "Frame 8 score");
+        this.assertEquals(false, this.getFrameScores(scores)[8].total, "Frame 9 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 5,4];
-        this.assertEquals(9, this.getFrameScores(scores, [])[9].total, "Frame 10 score");
+        this.assertEquals(9, this.getFrameScores(scores)[9].total, "Frame 10 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 10,10,10];
-        this.assertEquals(30, this.getFrameScores(scores, [])[9].total, "Frame 10 score");
+        this.assertEquals(30, this.getFrameScores(scores)[9].total, "Frame 10 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 10,9,1];
-        this.assertEquals(20, this.getFrameScores(scores, [])[9].total, "Frame 10 score");
+        this.assertEquals(20, this.getFrameScores(scores)[9].total, "Frame 10 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 9,1,5];
-        this.assertEquals(15, this.getFrameScores(scores, [])[9].total, "Frame 10 score");
+        this.assertEquals(15, this.getFrameScores(scores)[9].total, "Frame 10 score");
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 9,1,10];
-        this.assertEquals(20, this.getFrameScores(scores, [])[9].total, "Frame 10 score");
+        this.assertEquals(20, this.getFrameScores(scores)[9].total, "Frame 10 score");
+        scores = [9,1];
+        this.assertEquals(false, game.getFrameScores(scores)[0].total, "Frame 1 total");
+        this.assertEquals(9, this.getFrameScores(scores)[0].rolls[0], "Frame 1 roll 1");
+        this.assertEquals(1, this.getFrameScores(scores)[0].rolls[1], "Frame 1 roll 2");
 
         scores = [];
         isNextFrame = this.updateRoll(scores, 1);
@@ -222,10 +230,10 @@ var UnitTests = function() {
         return game.getCurrentFrame(scores, i, frame, roll);
     };
 
-    this.getFrameScores = function(scores, frameScores) {
+    this.getFrameScores = function(scores) {
         let game = new GameData();
         game.init();
-        return game.getFrameScores(scores, frameScores);
+        return game.getFrameScores(scores);
     };
 
     this.updateRoll = function(scores, value) {

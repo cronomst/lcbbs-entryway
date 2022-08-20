@@ -434,6 +434,7 @@ let GameData = function() {
         let roll = 0;
         let frameScores = [];
         for (let i=0; i<scores.length; i++) {
+            frameScores[frame] = {'rolls': [], 'total': false};
             if (frame == 9) {
                 let r1 = i+1 < scores.length ? scores[i+1] : 0;
                 let r2 = i+2 < scores.length ? scores[i+2] : 0;
@@ -452,12 +453,16 @@ let GameData = function() {
                         'total': 10 + r1 + r2
                     };
                 } else {
-                    frameScores[frame] = false;
+                    frameScores[frame] = {
+                        'rolls': [10],
+                        'total': false
+                    };
                 }
                 frame++;
                 roll = 0;
             } else if (roll == 1 && frame < 9) {
                 if (scores[i] + scores[i-1] == 10) {
+                    // Spare
                     let r1 = i+1 < scores.length ? scores[i+1] : false;
                     if (r1 !== false) {
                         frameScores[frame] = {
@@ -465,7 +470,11 @@ let GameData = function() {
                             'total': 10 + r1
                         };
                     } else {
-                        frameScores[frame] = false;
+                        // Spare with unknown follow-up roll
+                        frameScores[frame] = {
+                            'rolls': [scores[i-1], scores[i]],
+                            'total': false
+                        };
                     }
                 } else {
                     frameScores[frame] = {
@@ -476,6 +485,7 @@ let GameData = function() {
                 frame++;
                 roll = 0;
             } else {
+                frameScores[frame].rolls.push(scores[i]);
                 roll++;
             }
         }
