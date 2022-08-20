@@ -167,26 +167,26 @@ var UnitTests = function() {
         this.out('<h3>testDerivedFramePrototype</h3>');
         let scores = [];
         // Methods I would need:
-        // - get current frame and roll (done)
-        // - get frame scores (including 10th frame)
-        // - update score method, but with a return value indicating if there is a frame transition?
-        this.assertEquals(1, this.getFrame(scores, 0, 1, 0).frame, "Frame");
-        this.assertEquals(0, this.getFrame(scores, 0, 1, 0).roll, "Roll");
+        // - get current frame and roll - done
+        // - get frame scores (including 10th frame) - done (but should be modified to return rolls, too)
+        // - update score method, but with a return value indicating if there is a frame transition - done
+        this.assertEquals(1, this.getCurrentFrame(scores, 0, 1, 0).frame, "Frame");
+        this.assertEquals(0, this.getCurrentFrame(scores, 0, 1, 0).roll, "Roll");
         scores = [10, 9,1, 0,0, 5,5];
-        this.assertEquals(5, this.getFrame(scores, 0, 1, 0).frame, "Frame");
-        this.assertEquals(0, this.getFrame(scores, 0, 1, 0).roll, "Roll");
+        this.assertEquals(5, this.getCurrentFrame(scores, 0, 1, 0).frame, "Frame");
+        this.assertEquals(0, this.getCurrentFrame(scores, 0, 1, 0).roll, "Roll");
         scores = [10, 9,1, 0,0, 5];
-        this.assertEquals(4, this.getFrame(scores, 0, 1, 0).frame, "Frame");
-        this.assertEquals(1, this.getFrame(scores, 0, 1, 0).roll, "Roll");
+        this.assertEquals(4, this.getCurrentFrame(scores, 0, 1, 0).frame, "Frame");
+        this.assertEquals(1, this.getCurrentFrame(scores, 0, 1, 0).roll, "Roll");
         scores = [10, 10, 10, 10, 10, 10, 10, 10, 10];
-        this.assertEquals(10, this.getFrame(scores, 0, 1, 0).frame, "Frame");
-        this.assertEquals(0, this.getFrame(scores, 0, 1, 0).roll, "Roll");
+        this.assertEquals(10, this.getCurrentFrame(scores, 0, 1, 0).frame, "Frame");
+        this.assertEquals(0, this.getCurrentFrame(scores, 0, 1, 0).roll, "Roll");
         scores = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10,9];
-        this.assertEquals(10, this.getFrame(scores, 0, 1, 0).frame, "Frame");
-        this.assertEquals(2, this.getFrame(scores, 0, 1, 0).roll, "Roll");
+        this.assertEquals(10, this.getCurrentFrame(scores, 0, 1, 0).frame, "Frame");
+        this.assertEquals(2, this.getCurrentFrame(scores, 0, 1, 0).roll, "Roll");
         scores = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10,9,1];
-        this.assertEquals(10, this.getFrame(scores, 0, 1, 0).frame, "Frame");
-        this.assertEquals(3, this.getFrame(scores, 0, 1, 0).roll, "Roll");
+        this.assertEquals(10, this.getCurrentFrame(scores, 0, 1, 0).frame, "Frame");
+        this.assertEquals(3, this.getCurrentFrame(scores, 0, 1, 0).roll, "Roll");
 
         scores = [10];
         this.assertEquals(false, this.getFrameScores(scores, [])[0], "Frame 1 score");
@@ -214,17 +214,36 @@ var UnitTests = function() {
         scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10, 9,1,10];
         this.assertEquals(20, this.getFrameScores(scores, [])[9], "Frame 10 score");
 
+        scores = [];
+        isNextFrame = this.updateRoll(scores, 1);
+        this.assertEquals(false, isNextFrame);
+        this.assertEquals(1, scores[0]);
+        isNextFrame = this.updateRoll(scores, 9);
+        this.assertEquals(true, isNextFrame);
+        this.assertEquals(9, scores[1]);
+        isNextFrame = this.updateRoll(scores, 10);
+        this.assertEquals(true, isNextFrame);
+        this.assertEquals(10, scores[2]);
+
+        scores = [0,0, 5,5, 10, 10, 10, 10, 10, 10, 10];
+        isNextFrame = this.updateRoll(scores, 10);
+        this.assertEquals(false, isNextFrame);
+        isNextFrame = this.updateRoll(scores, 10);
+        this.assertEquals(false, isNextFrame);
+        isNextFrame = this.updateRoll(scores, 10);
+        this.assertEquals(false, isNextFrame);
+
     };
     
-    this.getFrame = function(scores, i, frame, roll) {
+    this.getCurrentFrame = function(scores, i, frame, roll) {
         if (i == scores.length) {
             return {"frame": frame, "roll": roll};
         }
         if (scores[i] == 10 && roll === 0 && frame < 10)
-            return this.getFrame(scores, i+1, frame+1, 0);
+            return this.getCurrentFrame(scores, i+1, frame+1, 0);
         if (roll == 1 && frame < 10)
-            return this.getFrame(scores, i+1, frame+1, 0);
-        return this.getFrame(scores, i+1, frame, roll+1);
+            return this.getCurrentFrame(scores, i+1, frame+1, 0);
+        return this.getCurrentFrame(scores, i+1, frame, roll+1);
     };
 
     this.getFrameScores = function(scores, frameScores) {
@@ -265,7 +284,18 @@ var UnitTests = function() {
             }
         }
         return frameScores;
-    }
+    };
+
+    this.updateRoll = function(scores, value) {
+        let frameData = this.getCurrentFrame(scores, 0, 1, 0);
+        scores.push(value);
+        if (frameData.frame < 10) {
+            if (frameData.roll == 1 || value == 10) {
+                return true;
+            }
+        }
+        return false;
+    };
 
     this.knockDownPins = function(game, count) {
         for (let i=0; i<count; i++) {

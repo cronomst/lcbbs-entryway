@@ -356,9 +356,22 @@ let GameData = function() {
         this.nextTurn();
         if (this.getPinsDown() == TOTAL_PINS) {
             // TODO: Trigger strike/spare screen
-            // TODO: Fix this because it won't work for strikes/spares on the 10th frame.
             this.updateFrameScore();
-            this.nextFrame();
+            if (this.frame == 10) {
+                if (this.roll == 0) {
+                    this.nextFrame();
+                    this.roll = 1;
+                    this.frame = 10;
+                } else if (this.roll == 1) {
+                    this.nextFrame();
+                    this.roll = 2;
+                    this.frame = 10;
+                } else {
+                    this.endGame();
+                }
+            } else {
+                this.nextFrame();
+            }
         }
         return true;
     };
@@ -396,6 +409,7 @@ let GameData = function() {
         let frameDownedPinCount = totalDownedPinCount;
         let scoreRollIndex = (this.frame-1) * 2 + this.roll;
 
+        // TODO: Does not handle frame 10 correctly when the first roll is a strike
         if (this.roll == 1) {
             frameDownedPinCount -= this.scores[p][scoreRollIndex-1];
         } else if (this.roll == 2) {
