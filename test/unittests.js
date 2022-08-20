@@ -81,38 +81,38 @@ var UnitTests = function() {
         let game = new GameData();
         game.init();
         game.scores = [
-            [10,0, 5,4, 10,'', 10,'', 10,'', 0,0, 10,'', '','', '','']
+            [10, 5,4, 10, 10, 10, 0,0, 10]
         ];
 
         this.assertEquals(19, game.getFrameScore(0, 1).total, "Frame 1 total");
-        this.assertEquals(9, game.getFrameScore(0, 2).total, "Frame 2 total");
-        this.assertEquals(30, game.getFrameScore(0, 3).total, "Frame 3 total");
-        this.assertEquals(20, game.getFrameScore(0, 4).total, "Frame 4 total");
-        this.assertEquals(10, game.getFrameScore(0, 5).total, "Frame 5 total");
-        this.assertEquals(0, game.getFrameScore(0, 6).total, "Frame 6 total");
-        this.assertEquals('', game.getFrameScore(0, 7).total, "Frame 7 total");
+        this.assertEquals(28, game.getFrameScore(0, 2).total, "Frame 2 total");
+        this.assertEquals(58, game.getFrameScore(0, 3).total, "Frame 3 total");
+        this.assertEquals(78, game.getFrameScore(0, 4).total, "Frame 4 total");
+        this.assertEquals(88, game.getFrameScore(0, 5).total, "Frame 5 total");
+        this.assertEquals(88, game.getFrameScore(0, 6).total, "Frame 6 total");
+        this.assertEquals(false, game.getFrameScore(0, 7).total, "Frame 7 total");
 
         game.scores = [
-            [1,0, 10,'', 1,2, '','', '','', '','', '','', '','', '','']
+            [1,0, 10, 1,2]
         ];
         this.assertEquals(1, game.getFrameScore(0, 1).total, "Frame 1 total");
-        this.assertEquals(13, game.getFrameScore(0, 2).total, "Frame 2 total");
-        this.assertEquals(3, game.getFrameScore(0, 3).total, "Frame 3 total");
+        this.assertEquals(14, game.getFrameScore(0, 2).total, "Frame 2 total");
+        this.assertEquals(17, game.getFrameScore(0, 3).total, "Frame 3 total");
 
         game.scores = [
-            [1,0, 10,'', 3,0, 10,'', 10,'', 10,'', '','', '','', '','']
+            [1,0, 10, 3,0, 10, 10, 10]
         ];
         this.assertEquals(1, game.getFrameScore(0, 1).total, "Frame 1 total");
-        this.assertEquals(13, game.getFrameScore(0, 2).total, "Frame 2 total");
-        this.assertEquals(3, game.getFrameScore(0, 3).total, "Frame 3 total");
-        this.assertEquals(30, game.getFrameScore(0, 4).total, "Frame 4 total");
+        this.assertEquals(14, game.getFrameScore(0, 2).total, "Frame 2 total");
+        this.assertEquals(17, game.getFrameScore(0, 3).total, "Frame 3 total");
+        this.assertEquals(47, game.getFrameScore(0, 4).total, "Frame 4 total");
 
         game.scores = [
-            [10,'', 10,'', '','', '','', '','', '','', '','', '','', '','']
+            [10, 10]
         ];
-        this.assertEquals('', game.getFrameScore(0, 1).total, "Frame 1 total");
-        this.assertEquals('', game.getFrameScore(0, 2).total, "Frame 2 total");
-        this.assertEquals('', game.getFrameScore(0, 3).total, "Frame 3 total");
+        this.assertEquals(false, game.getFrameScore(0, 1).total, "Frame 1 total");
+        this.assertEquals(false, game.getFrameScore(0, 2).total, "Frame 2 total");
+        this.assertEquals(false, game.getFrameScore(0, 3).total, "Frame 3 total");
 
     };
 
