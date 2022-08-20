@@ -169,7 +169,7 @@ let GameData = function() {
     
     this.init = function() {
         this.scores = [[],[]];
-        for (let i=0; i<20; i++) {
+        for (let i=0; i<21; i++) {
             this.scores[0].push('');
             this.scores[1].push('');
         }
@@ -371,8 +371,11 @@ let GameData = function() {
     this.nextRoll = function() {
         this.selectedPins = [];
         this.roll++;
-        if (this.roll > 1) {
+        if (this.roll > 1 && this.frame < 10) {
             this.nextFrame();
+            return;
+        } else if (this.roll > 2) {
+            this.endGame();
             return;
         }
 
@@ -383,8 +386,11 @@ let GameData = function() {
         }
     };
 
+    this.endGame = function() {
+        // TODO: Implement end of game logic
+    }
+
     this.updateFrameScore = function() {
-        // TODO: Fix this logic because it can break on the 10th frame
         let p = this.player;
         let totalDownedPinCount = this.getPinsDown();
         let frameDownedPinCount = totalDownedPinCount;
@@ -392,6 +398,8 @@ let GameData = function() {
 
         if (this.roll == 1) {
             frameDownedPinCount -= this.scores[p][scoreRollIndex-1];
+        } else if (this.roll == 2) {
+            frameDownedPinCount -= this.scores[p][scoreRollIndex-1] + this.scores[p][scoreRollIndex-2];
         }
         this.scores[p][scoreRollIndex] = frameDownedPinCount;
     };
@@ -501,7 +509,7 @@ let GameData = function() {
 
 const SCREEN_WIDTH = 56;
 const SCREEN_HEIGHT = 20;
-const PIN_ORIGIN_X = 24;
+const PIN_ORIGIN_X = 25;
 const PIN_ORIGIN_Y = 3;
 const STATE_LOGIN = 0;
 const STATE_DOORS = 1;
@@ -651,11 +659,11 @@ function drawPinCards() {
 }
 
 function drawScore() {
-    let row = 3;
-    let col = 1;
+    let row = 2;
+    let col = 2;
     let startFrame = gameData.frame < 4 ? 0 : gameData.frame - 3;
     let endFrame = gameData.frame < 4 ? 2 : gameData.frame - 1;
-    drawFrameScores(startFrame, endFrame, row, col);
+    drawFrameScores(startFrame, endFrame, col, row);
 }
 
 function drawFrameScores(minFrame, maxFrame, x, y) {
@@ -684,27 +692,58 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
     for (let i=0; i<maxFrame - minFrame + 1; i++) {
         let frameNum = (minFrame + i + 1).toString();
         let frameData = gameData.getFrameScore(player, i + minFrame + 1);
-        let frameSymbols = getFrameSymbols(frameData);
+        let frameSymbols = getFrameSymbols(frameData, frameNum);
         let frameTotal = frameData.total !== '' ? gameData.getTotalScore(player, i + minFrame + 1) : '';
         // Frame border
         util.draw(frameCenter, 15, x + (4*(i+1)), y);
+        if (frameNum == 10) {
+            // Extend the 10th frame
+            util.draw(frameCenter, 15, x + (4*(i+1)) + 2, y);
+        }
         // Frame number
         util.draw(frameNum, frameNum == gameData.frame ? 17 : 5, x + (4*(i+1)+1), y+1);
         // Scores
         util.draw(frameSymbols.first.toString(), 15, x + (4*(i+1)), y+3);
         util.draw(frameSymbols.second.toString(), 15, x + (4*(i+1)+2), y+3);
+        if (frameNum == 10) {
+            util.draw(frameSymbols.third.toString(), 15, x + (4*(i+1)+4), y+3);
+        }
         util.draw(padString(frameTotal,3), 15, x + (4*(i+1)), y+4);
     }
     debugText = gameData.scores[0].toString();
-    util.draw(frameRight, 15, x + frameWidth + 4 - 1, y);
-    util.draw(padString(gameData.getTotalScore(player), 3), 15, x + frameWidth + 4, y+4);
+    if (maxFrame == 9) {
+        util.draw(frameRight, 15, x + frameWidth + 4 - 1 + 2, y);
+        util.draw(padString(gameData.getTotalScore(player), 3), 15, x + frameWidth + 4 + 2, y+4);
+    } else {
+        util.draw(frameRight, 15, x + frameWidth + 4 - 1, y);
+        util.draw(padString(gameData.getTotalScore(player), 3), 15, x + frameWidth + 4, y+4);
+    }
 }
 
-function getFrameSymbols(frameData) {
+function getFrameSymbols(frameData, frameNum) {
     let result = {
         "first": frameData.first,
         "second": frameData.second,
         "third": frameData.third
+    }
+    if (frameNum == 10) {
+        if (frameData.first == 10) {
+            result.first = 'X';
+            if (frameData.second == 10) {
+                result.second = 'X';
+                if (frameData.third == 10) {
+                    result.third = 'X';
+                }
+            } else if (frameData.second + frameData.third == 10) {
+                result.third = '/';
+            }
+        } else if (frameData.first + frameData.second == 10) {
+            result.second = '/';
+            if (frameData.third == 10) {
+                result.third = 'X';
+            }
+        }
+        return result;
     }
     if (frameData.first == 10) {
         result.first = '';
@@ -792,7 +831,7 @@ function drawHandCard(pos, value, stackSize, available) {
         value = "_" + value + "_";
     }
     let row = 12;
-    let col = 3;
+    let col = 2;
     let card = cardData[pos-1];
     let cardFace = "~F╔═~H" + card.label + "~F═╗\n" +
                    "║ " + value + " ║";
