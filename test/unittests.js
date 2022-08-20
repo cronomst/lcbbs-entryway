@@ -7,7 +7,7 @@ var UnitTests = function() {
         this.testPadString();
         this.testGetFrameSymbols();
         this.testGetTotalScore();
-        this.testDerivedFramePrototype();
+        this.testRefactoredScoreMethods();
 
         this.displayOutput();
     };
@@ -148,15 +148,12 @@ var UnitTests = function() {
         this.assertEquals(0, game.getTotalScore(0), "Get game total score");
     };
 
-    this.testDerivedFramePrototype = function() {
-        this.out('<h3>testDerivedFramePrototype</h3>');
+    this.testRefactoredScoreMethods = function() {
+        this.out('<h3>testRefactoredScoreMethods</h3>');
         let game = new GameData();
         game.init();
         let scores = [];
-        // Methods I would need:
-        // - get current frame and roll - done
-        // - get frame scores (including 10th frame) - done (but should be modified to return rolls, too)
-        // - update score method, but with a return value indicating if there is a frame transition - done
+
         this.assertEquals(1, this.getCurrentFrame(scores, 0, 1, 0).frame, "Frame");
         this.assertEquals(0, this.getCurrentFrame(scores, 0, 1, 0).roll, "Roll");
         scores = [10, 9,1, 0,0, 5,5];
