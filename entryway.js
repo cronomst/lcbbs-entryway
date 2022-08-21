@@ -713,11 +713,11 @@ function processSettingInput(key) {
 }
 
 function drawLogin() {
-    let logo = "               ██████████ ██  ██  █████\n" +
-               "                   ██    ██  ██  ██\n" + 
-               "                  ██    ██████  █████\n" +
-               "                 ██    ██  ██  ██\n" +
-               "                ██    ██  ██  ██████\n" + 
+    let logo = "               ▟████████▛ ▟▛  ▟▛  ▟███▛\n" +
+               "                   ▟▛    ▟▛  ▟▛  ▟▛\n" + 
+               "                  ▟▛    ▟████▛  ▟███▛\n" +
+               "                 ▟▛    ▟▛  ▟▛  ▟▛\n" +
+               "                ▟▛    ▟▛  ▟▛  ▟████▛\n" + 
                "\n" +
                "~F ▄█████ ▄███  ▄██▄ ▄██▄  ██  ██ ██   ██  ███  ██    ██\n" +
                " ██     ██ ██  ██  ██ ██  ████  ██   ██ ██ ██  ██  ██\n" +
@@ -730,7 +730,7 @@ function drawLogin() {
                "           ~H║~9       Winter Park, FL~H       ║\n" +
                "           ╚═════════════════════════════╝";
 
-    util.draw(logo, 10, 0, 1);
+    util.draw(logo, 8, 0, 1);
     util.draw("Press any key to log in...", 16, 1, SCREEN_HEIGHT-2);
 }
 
