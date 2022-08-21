@@ -912,7 +912,7 @@ function drawNote() {
     let headings = [
         '~F<~HThe Entryway BBS~F>',
         '~F<~HA Modest Success~F>',
-        '~F<~HPhase 3~F>'
+        '~F<~HThe Exit~F>'
     ];
     let noteText = [
         'I started The Entryway BBS the summer before my sophomore year of high ' +
@@ -924,13 +924,23 @@ function drawNote() {
         'installed it on The Entryway.',
 
         'Bowling Solitaire never gained a lot of popularity compared to the other door ' +
-        'games, but it had a few dedicated players and I was always happy to see when it ' +
-        'was running. ' +
-        'Even though it was near the end of the BBS era, it did not take long the The ' +
-        'Entryway to gain a few hundred users. I got to know some of the regulars pretty ' +
-        'well and even became friends with several of them in the real world.',
+        'games, but it had a few dedicated players and I was always happy to see it ' +
+        'running. ' +
+        'As for the BBS itself, it did not take long for The ' +
+        'Entryway to gain a few hundred users. Much to my surprise, several people even' +
+        'mailed me money to cover the costs of registering my shareware BBS software and' +
+        'door games. There were even some regulars that I got to know pretty ' +
+        'well, a few of which I became friends with outside of the BBS.',
 
-        'Phase 3 text'
+        'In all, The Entryway remained active for just under four years. It was the waning days ' +
+        'of the BBS era and daily logins dropped as people migrated their online activities to ' +
+        'the Internet (including myself). ' +
+        'But, I remained friends with that group of regulars, many of them to this day. ' +
+        'And through those friends, I met others, which further expanded into a great web of friends ' +
+        'and acquaintances. These social connections, which would go on to influence my interests, my ' +
+        'romantic relationships, and even my career, all stem from this common root. Had I not decided ' +
+        'to dive into that little summer project, I cannot even imagine what direction my life might have ' +
+        'taken and the person I would be today.'
     ];
     if (options.storyPhase < 4) {
         let noteIndex = options.storyPhase-1;
