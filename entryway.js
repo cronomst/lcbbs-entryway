@@ -612,11 +612,12 @@ const STATE_DOORS = 1;
 const STATE_SETTINGS = 2;
 const STATE_GAME = 3;
 const STATE_GAMEOVER = 4;
+const STATE_NOTES = 5;
 
 let util = new TextUtil();
 let gameData = new GameData();
 let state = STATE_LOGIN;
-let options = {"showHints": true, "visibleTrash": false, "players": 1};
+let options = {"showHints": true, "visibleTrash": false, "players": 1, "storyPhase": 0};
 
 var debugText = "";
 
@@ -656,6 +657,9 @@ function onUpdate() {
         case STATE_GAMEOVER:
             drawFinalScores();
             break;
+        case STATE_NOTES:
+            drawNote();
+            break;
     }
 }
 
@@ -679,8 +683,10 @@ function onInput(key) {
             }
             break;
         case STATE_GAMEOVER:
-            gameData.init();
-            state = STATE_SETTINGS;
+            advanceStory();
+            break;
+        case STATE_NOTES:
+            state = STATE_DOORS;
             break;
     }
 }
@@ -688,6 +694,7 @@ function onInput(key) {
 function processSettingInput(key) {
     keyChar = String.fromCharCode(key).toUpperCase();
     if (keyChar == "S") { // Start game
+        gameData.init();
         state = STATE_GAME;
     } else if (keyChar == "H") { // Hint toggle
         options.showHints = !options.showHints;
@@ -898,13 +905,26 @@ function getFrameSymbols(frameData, frameNum) {
 }
 
 function drawNote() {
+    let heading = '~F<~HThe Entryway BBS~F>';
     let noteText = "I started The Entryway BBS the summer before my sophomore year of high " +
                "school. I thought it would be a fun project and a way to distribute the " +
-               "games I made. My favorite BBS feature was the door games, though. " +
+               "games I made (it wasn't. I was notorious for never finishing them). " + 
+               "My favorite BBS feature was the door games, though. " +
                "Somewhere, I discovered a game called \"Bowling Solitaire\" that was an " +
                "interesting diversion from the usual role-playing and space trading, so I " +
-               "included it on The Entryway.";
-    drawTextWrapped(noteText, 13, 1, 1, SCREEN_WIDTH-2);
+               "installed it on The Entryway.";
+    util.draw(heading, 15, 1, 1);
+    drawTextWrapped(noteText, 13, 1, 3, SCREEN_WIDTH-2);
+}
+
+function advanceStory() {
+    if (options.storyPhase == 0) {
+        options.storyPhase = 1;
+        //saveData(JSON.stringify(options)); 
+        state = STATE_NOTES;
+    } else {
+        state = STATE_SETTINGS;
+    }
 }
 
 
