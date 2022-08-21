@@ -701,25 +701,27 @@ function drawSettingsMenu() {
                "~7(~HP~7)~Flayers: " + options.players + "\n" +
                "~7(~HQ~7)~Fuit";
     let graphic = "\n" +
-"                         \n" +
-"                         \n" +
-"                         \n" +
-"                         \n" +
-"                         \n" +
-"       ,...              \n" +
-"    .;;'   `'-.          \n" +
-"  .;;:         '.        \n" +
-" .;;:'( )        .       \n" +
-" ;;:'             :      \n" +
-" ;;:( )   ( )     :      \n" +
-" ;;::.            :      \n" +
-" ';;::.          '       \n" +
-"  ';;::.       .'        \n" +
+"~1██████████████▛~D ,;-. ~1▟███~D\n" +
+"                ;. :     \n" +
+"                 ;:      \n" +
+"                ;══:     \n" +
+"               ;;   :    \n" +
+"       ,...   .;;    .   \n" +
+"    .;;'   `'-;;     :   \n" +
+"~1▛~D .;;:         '.     : ~1▟~D\n" +
+" .;;:' ()        .    ' \n" +
+" ;;:'             :   : \n" +
+" ;;: ()  ()       :   : \n" +
+" ;;::.            :═══'  \n" +
+" ';;::.          '   :   \n" +
+"  ';;::.       .'---'    \n" +
 "    '-;;:..,.-'          \n" +
 "        '''              ";
 
-    util.draw(title, 15, 1, 1);
-    util.draw(graphic, 15, SCREEN_WIDTH-26, 0);
+    fillArea('█', 1, 0, 1, SCREEN_WIDTH, 1);
+    fillArea('█', 1, 0, 8, SCREEN_WIDTH, 1);
+    util.draw(title, 17, 2, 4);
+    util.draw(graphic, 13, SCREEN_WIDTH-26, 0);
     util.draw(menu, 15, 1, 10);
     util.draw("Choose (S,H,V,P,Q):_█_", 15, 1, SCREEN_HEIGHT-2);
 }
