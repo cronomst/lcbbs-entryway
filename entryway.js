@@ -458,12 +458,24 @@ let GameData = function() {
                 'total': false
             };
             if (frame == 9) {
-                let r1 = i+1 < scores.length ? scores[i+1] : 0;
-                let r2 = i+2 < scores.length ? scores[i+2] : 0;
-                frameScores[frame] = {
-                    'rolls': [scores[i], r1, r2],
-                    'total': scores[i] + r1 + r2
-                };
+                let r1 = i+1 < scores.length ? scores[i+1] : false;
+                let r2 = i+2 < scores.length ? scores[i+2] : false;
+                if (r1 !== false && r2 !== false) {
+                    frameScores[frame] = {
+                        'rolls': [scores[i], r1, r2],
+                        'total': scores[i] + r1 + r2
+                    };
+                } else if (r1 !== false) {
+                    frameScores[frame] = {
+                        'rolls': [scores[i], r1],
+                        'total': scores[i] + r1
+                    };
+                } else {
+                    frameScores[frame] = {
+                        'rolls': [scores[i]],
+                        'total': false
+                    };
+                }
                 return frameScores;
             }
             if (scores[i] == 10 && roll === 0 && frame < 9) {
@@ -847,6 +859,15 @@ function getFrameSymbols(frameData, frameNum) {
         "second": frameData.second,
         "third": frameData.third
     }
+    if (frameData.first === 0) {
+        result.first = '-';
+    }
+    if (frameData.second === 0) {
+        result.second = '-';
+    }
+    if (frameData.third === 0) {
+        result.third = '-';
+    }
     if (frameNum == 10) {
         if (frameData.first == 10) {
             result.first = 'X';
@@ -872,15 +893,6 @@ function getFrameSymbols(frameData, frameNum) {
         return result;
     } else if (frameData.first + frameData.second == 10) {
         result.second = '/';
-    }
-    if (frameData.first === 0) {
-        result.first = '-';
-    }
-    if (frameData.second === 0) {
-        result.second = '-';
-    }
-    if (frameData.third === 0) {
-        result.third = '-';
     }
     return result;
 }
