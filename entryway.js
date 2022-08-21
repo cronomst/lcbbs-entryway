@@ -160,7 +160,7 @@ let GameData = function() {
     this.deck = [];
     this.pins = [];
     this.hand = [];
-    this.scores = [];
+    this.scores = [[],[]];
     this.selectedPins = [];
     this.player = 0;
     this.turn = 0;
@@ -168,10 +168,21 @@ let GameData = function() {
     this.frame = 0;
     this.prevPinsDown = false;
     this.frameScores = [];
+    this.gameOver = false;
     
     this.init = function() {
+        this.deck = [];
+        this.pins = [];
+        this.hand = [];
         this.scores = [[],[]];
+        this.selectedPins = [];
+        this.player = 0;
+        this.turn = 0;
+        this.roll = 0;
+        this.frame = 0;
+        this.prevPinsDown = false;
         this.frameScores = [];
+        this.gameOver = false;
         this.nextFrame();
         this.updateAvailable();
     };
@@ -358,23 +369,27 @@ let GameData = function() {
             // TODO: Trigger strike/spare screen
             this.updateFrameScore();
             if (this.frame == 10) {
-                if (this.roll == 0) {
-                    this.nextFrame();
-                    this.roll = 1;
-                    this.frame = 10;
-                } else if (this.roll == 1) {
-                    this.nextFrame();
-                    this.roll = 2;
-                    this.frame = 10;
-                } else {
-                    this.endGame();
-                }
+                this.handleLastFrameStrikesAndSpares();
             } else {
                 this.nextFrame();
             }
         }
         return true;
     };
+
+    this.handleLastFrameStrikesAndSpares = function() {
+        if (this.roll == 0) {
+            this.nextFrame();
+            this.roll = 1;
+            this.frame = 10;
+        } else if (this.roll == 1) {
+            this.nextFrame();
+            this.roll = 2;
+            this.frame = 10;
+        } else {
+            this.endGame();
+        }
+    }
 
     this.nextTurn = function() {
         this.turn++;
@@ -387,6 +402,9 @@ let GameData = function() {
         if (this.roll > 1 && this.frame < 10) {
             this.nextFrame();
             return;
+        } else if (this.roll > 1 && this.frame == 10 
+                && this.frameScores[9].rolls[0] + this.frameScores[9].rolls[0] < 10) {
+            this.endGame();
         } else if (this.roll > 2) {
             this.endGame();
             return;
@@ -401,6 +419,7 @@ let GameData = function() {
 
     this.endGame = function() {
         // TODO: Implement end of game logic
+        this.gameOver = true;
     };
 
     this.getFrame = function(scores) {
@@ -580,6 +599,7 @@ const STATE_LOGIN = 0;
 const STATE_DOORS = 1;
 const STATE_SETTINGS = 2;
 const STATE_GAME = 3;
+const STATE_GAMEOVER = 4;
 
 let util = new TextUtil();
 let gameData = new GameData();
@@ -621,6 +641,9 @@ function onUpdate() {
                 SCREEN_WIDTH/2 - 11, SCREEN_HEIGHT-2);
             drawText(debugText, 3, 0, SCREEN_HEIGHT-1);
             break;
+        case STATE_GAMEOVER:
+            drawFinalScores();
+            break;
     }
 }
 
@@ -639,6 +662,13 @@ function onInput(key) {
             break;
         case STATE_GAME:
             gameData.processInput(key);
+            if (gameData.gameOver == true) {
+                state = STATE_GAMEOVER;
+            }
+            break;
+        case STATE_GAMEOVER:
+            gameData.init();
+            state = STATE_SETTINGS;
             break;
     }
 }
@@ -698,7 +728,7 @@ function drawSettingsMenu() {
     let menu = "~7(~HS~7)~Ftart Game\n" +
                "~7(~HH~7)~Fints: " + (options.showHints ? "~HON~F" : "~8OFF~F") + "\n" +
                "~7(~HV~7)~Fisible Trash Pile: " + (options.visibleTrash ? "~HON~F" : "~8OFF~F") + "\n" +
-               "~7(~HP~7)~Flayers: " + options.players + "\n" +
+               //"~7(~HP~7)~Flayers: " + options.players + "\n" +
                "~7(~HQ~7)~Fuit";
     let graphic = "\n" +
 "~1██████████████▛~D ,;-. ~1▟███~D\n" +
@@ -723,7 +753,7 @@ function drawSettingsMenu() {
     util.draw(title, 17, 2, 4);
     util.draw(graphic, 13, SCREEN_WIDTH-26, 0);
     util.draw(menu, 15, 1, 10);
-    util.draw("Choose (S,H,V,P,Q):_█_", 15, 1, SCREEN_HEIGHT-2);
+    util.draw("Choose (S,H,V,Q):_█_", 15, 1, SCREEN_HEIGHT-2);
 }
 
 function drawHand() {
@@ -757,7 +787,7 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
     let frameLeft = "   ╔\n" +
                     "   ║\n" +
                     "╔══╬\n" +
-                    "║  ║\n" +
+                    "║P1║\n" +
                     "║  ║\n" +
                     "╚══╩";
     let frameCenter = "═══╦\n" +
@@ -780,6 +810,7 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
         let frameData = gameData.getFrameScore(player, i + minFrame + 1);
         let frameSymbols = getFrameSymbols(frameData, frameNum);
         let frameTotal = frameData.total !== false ? gameData.getTotalScore(player, i + minFrame + 1) : '';
+        let isEndOfGame = gameData.gameOver;
         // Frame border
         util.draw(frameCenter, 15, x + (4*(i+1)), y);
         if (frameNum == 10) {
@@ -787,7 +818,7 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
             util.draw(frameCenter, 15, x + (4*(i+1)) + 2, y);
         }
         // Frame number
-        util.draw(frameNum, frameNum == gameData.frame ? 17 : 5, x + (4*(i+1)+1), y+1);
+        util.draw(frameNum, frameNum == gameData.frame || isEndOfGame ? 17 : 5, x + (4*(i+1)+1), y+1);
         // Scores
         util.draw(frameSymbols.first.toString(), 15, x + (4*(i+1)), y+3);
         util.draw(frameSymbols.second.toString(), 15, x + (4*(i+1)+2), y+3);
@@ -800,7 +831,7 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
     let runningTotal = gameData.getTotalScore(player);
     if (maxFrame == 9) {
         util.draw(frameRight, 15, x + frameWidth + 4 - 1 + 2, y);
-        util.draw(padString(runningTotal !== false ? runningTotal : '0'), 3, 15, x + frameWidth + 4 + 2, y+4);
+        util.draw(padString(runningTotal !== false ? runningTotal : '0', 3), 15, x + frameWidth + 4 + 2, y+4);
     } else {
         util.draw(frameRight, 15, x + frameWidth + 4 - 1, y);
         util.draw(padString(runningTotal !== false ? runningTotal : '0', 3), 15, x + frameWidth + 4, y+4);
@@ -937,6 +968,13 @@ function drawTrash() {
     if (options.visibleTrash) {
         drawText("Trash [" + gameData.deck.toString() + "]", 8, 0, 0);
     }
+}
+
+function drawFinalScores() {
+    util.draw('F I N A L   S C O R E S', 16, SCREEN_WIDTH/2 - 12, 2);
+    drawFrameScores(0, 9, 3, 4);
+    util.draw('Press any key to continue...', 9,
+                SCREEN_WIDTH/2 - 14, SCREEN_HEIGHT-2);
 }
 
 function loadOptions() {
