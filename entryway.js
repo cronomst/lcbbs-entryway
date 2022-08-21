@@ -658,7 +658,11 @@ function onUpdate() {
             drawFinalScores();
             break;
         case STATE_NOTES:
-            drawNote();
+            if (selectedNote) {
+                drawNote(selectedNote);
+            } else {
+                drawNote();
+            }
             break;
         case STATE_NOTE_LIST:
             drawNoteMenu();
@@ -704,12 +708,13 @@ function onInput(key) {
                 showNote(1);
             }
             if (keyCode == "2") {
-                showNote(1);
+                showNote(2);
             }
             if (keyCode == "3") {
-                showNote(1);
+                showNote(3);
             }
             if (keyCode == "Q") {
+                selectedNote = 0;
                 state = STATE_DOORS;
             }
             break;
@@ -723,13 +728,15 @@ function processSettingInput(key) {
         state = STATE_GAME;
     } else if (keyChar == "H") { // Hint toggle
         options.showHints = !options.showHints;
-        //saveData(JSON.stringify(options));
+        saveOptions();
     } else if (keyChar == "V") { // Visible trash toggle
         options.visibleTrash = !options.visibleTrash;
-        //saveData(JSON.stringify(options));
+        saveOptions();
     } else if (keyChar == "P") { // Player count toggle
     } else if (keyChar == "Q") {
         state = STATE_DOORS;
+    } else if (keyChar == '!') { // Delete save data
+        deleteOptions();
     }
 }
 
@@ -956,7 +963,7 @@ function drawNote(num) {
     let noteIndex = num > 0 ? num-1 : options.storyPhase-1;
     let note = getNote(noteIndex);
     if (options.storyPhase < 4 && note !== false) {
-        util.draw(note.heading, 15, 1, 1);
+        util.draw('~F<~H' + note.heading + '~F>', 15, 1, 1);
         drawTextWrapped(note.text, 13, 1, 3, SCREEN_WIDTH-2);
     }
 }
@@ -964,23 +971,28 @@ function drawNote(num) {
 function drawNoteMenu() {
     let maxNotes = options.storyPhase;
     let menu = '';
+    let opts ='';
     for (let i=0; i<3; i++) {
         if (i < maxNotes) {
             let note = getNote(i);
-            menu += '~F(~H' + (i+1) + '~F)~D ' + note.heading + "\n";
+            menu += '~F(~H' + (i+1) + '~F) ' + note.heading + "\n";
+            opts += (i+1) + ',';
         } else {
             menu += '~6(' + (i+1) + ") ---\n";
         }
-        menu += '~C══════════════════════════════\n';
+        menu += '~9══════════════════════════════\n';
     }
+    opts += 'Q';
     menu += '~F(~HQ~F)~D Return to Doors Menu';
-    util.draw(menu, 15, 2, 2);
+    util.draw('M E M O   P A D', 16, 2, 1);
+    util.draw(menu, 15, 1, 3);
+    util.draw("Choose (" + opts + "):_█_", 15, 1, SCREEN_HEIGHT-2);
 }
 
 function getNote(num) {
     let notes = [
         {
-            'heading': '~F<~HThe Entryway BBS~F>',
+            'heading': 'The Entryway BBS',
             'text': 'I started The Entryway BBS the summer before my sophomore year of high ' +
                 'school. I thought it would be a fun project. Plus, it could be a way to distribute the ' +
                 "games and mods I made (it wasn't. I was notorious for never finishing them). " + 
@@ -990,7 +1002,7 @@ function getNote(num) {
                 'installed it on The Entryway.'
         },
         {
-            'heading': '~F<~HA Modest Success~F>',
+            'heading': 'A Modest Success',
             'text': 'Bowling Solitaire never gained a lot of popularity compared to the other door ' +
                 'games, but it had a few dedicated players and I was always happy to see it ' +
                 'running. ' +
@@ -1001,7 +1013,7 @@ function getNote(num) {
                 'well, a few of which I became friends with outside of the BBS.'
         },
         {
-            'heading': '~F<~HThe Exit~F>',
+            'heading': 'The Exit',
             'text': 'In all, The Entryway remained active for just under four years. It was the waning days ' +
                 'of the BBS era and daily logins dropped as people migrated their online activities to ' +
                 'the Internet (including myself). ' +
@@ -1025,15 +1037,15 @@ function advanceStory() {
     let phase2ScoreTrigger = 100;
     if (options.storyPhase == 0) {
         options.storyPhase = 1;
-        //saveData(JSON.stringify(options)); 
+        saveOptions();
         state = STATE_NOTES;
     } else if (options.storyPhase == 1 && gameData.getTotalScore(0) >= phase1ScoreTrigger) {
         options.storyPhase = 2;
-        //saveData(JSON.stringify(options)); 
+        saveOptions();
         state = STATE_NOTES;
     } else if (options.storyPhase == 2 && gameData.getTotalScore(0) >= phase2ScoreTrigger) {
         options.storyPhase = 3;
-        //saveData(JSON.stringify(options)); 
+        saveOptions();
         state = STATE_NOTES;
     } else {
         state = STATE_SETTINGS;
@@ -1130,6 +1142,14 @@ function loadOptions() {
     if (data != false) {
         options = JSON.parse(data);
     }
+}
+
+function saveOptions() {
+    saveData(JSON.stringify(options));
+}
+
+function deleteOptions() {
+    saveData('');
 }
 
 function padString(value, padding) {
