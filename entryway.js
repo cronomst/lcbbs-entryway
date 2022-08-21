@@ -611,11 +611,13 @@ const STATE_SETTINGS = 2;
 const STATE_GAME = 3;
 const STATE_GAMEOVER = 4;
 const STATE_NOTES = 5;
+const STATE_NOTE_LIST = 6;
 
 let util = new TextUtil();
 let gameData = new GameData();
 let state = STATE_LOGIN;
 let options = {"showHints": true, "visibleTrash": false, "players": 1, "storyPhase": 0};
+let selectedNote = 0;
 
 var debugText = "";
 
@@ -658,10 +660,14 @@ function onUpdate() {
         case STATE_NOTES:
             drawNote();
             break;
+        case STATE_NOTE_LIST:
+            drawNoteMenu();
+            break;
     }
 }
 
 function onInput(key) {
+    let keyCode = String.fromCharCode(key).toUpperCase();
     switch (state) {
         case STATE_LOGIN:
             state = STATE_DOORS;
@@ -669,6 +675,9 @@ function onInput(key) {
         case STATE_DOORS:
             if (key == "1".charCodeAt(0)) {
                 state = STATE_SETTINGS;
+            }
+            if (key == "2".charCodeAt(0) && options.storyPhase > 0) {
+                state = STATE_NOTE_LIST;
             }
             break;
         case STATE_SETTINGS:
@@ -688,7 +697,21 @@ function onInput(key) {
             advanceStory();
             break;
         case STATE_NOTES:
-            state = STATE_DOORS;
+            state = STATE_NOTE_LIST;
+            break;
+        case STATE_NOTE_LIST:
+            if (keyCode == "1") {
+                showNote(1);
+            }
+            if (keyCode == "2") {
+                showNote(1);
+            }
+            if (keyCode == "3") {
+                showNote(1);
+            }
+            if (keyCode == "Q") {
+                state = STATE_DOORS;
+            }
             break;
     }
 }
@@ -733,7 +756,10 @@ function drawLogin() {
 }
 
 function drawDoorsMenu() {
-    let menu = "~6╔════════════════════════════════════════════════════╗\n" +
+    let menu;
+    let opts;
+    if (options.storyPhase < 1) {
+        menu = "~6╔════════════════════════════════════════════════════╗\n" +
                "║                 ~GD O O R   G A M E S~6                ║\n" +
                "╠═══════════════════════╦════════════════════════════╣\n" +
                "║~A<~H1~A>~C ~HBowling Solitaire~6  ║ ~CA game of solitaire played~6 ║\n" +
@@ -742,8 +768,21 @@ function drawDoorsMenu() {
                "║<2> ...Coming soon...~6  ║ ~C~6                           ║\n" +
                "║                       ║                            ║\n" +
                "╚═══════════════════════╩════════════════════════════╝";
+        opts = '1';
+    } else {
+        menu = "~6╔════════════════════════════════════════════════════╗\n" +
+               "║                 ~GD O O R   G A M E S~6                ║\n" +
+               "╠═══════════════════════╦════════════════════════════╣\n" +
+               "║~A<~H1~A>~C ~HBowling Solitaire~6  ║ ~CA game of solitaire played~6 ║\n" +
+               "║                       ║ ~Cwith the rules of bowling.~6 ║\n" +
+               "║                       ║                            ║\n" +
+               "║~A<~H2~A>~C ~HMemo Pad~6           ║ ~CMessages from the SysOp~6    ║\n" +
+               "║                       ║                            ║\n" +
+               "╚═══════════════════════╩════════════════════════════╝";
+        opts = '1,2'
+    }
     util.draw(menu, 6, 1, 5);
-    util.draw("Choose (1):_█_", 15, 1, SCREEN_HEIGHT-2);
+    util.draw("Choose (" + opts + "):_█_", 15, 1, SCREEN_HEIGHT-2);
 }
 
 function drawSettingsMenu() {
@@ -906,47 +945,79 @@ function getFrameSymbols(frameData, frameNum) {
     return result;
 }
 
-function drawNote() {
-    let headings = [
-        '~F<~HThe Entryway BBS~F>',
-        '~F<~HA Modest Success~F>',
-        '~F<~HThe Exit~F>'
-    ];
-    let noteText = [
-        'I started The Entryway BBS the summer before my sophomore year of high ' +
-        'school. I thought it would be a fun project. Plus, it could be a way to distribute the ' +
-        "games and mods I made (it wasn't. I was notorious for never finishing them). " + 
-        'My favorite BBS feature was the door games, though. ' +
-        'Somewhere, I discovered a game called "Bowling Solitaire" that was an ' +
-        'interesting diversion from the usual role-playing and space trading, so I ' +
-        'installed it on The Entryway.',
-
-        'Bowling Solitaire never gained a lot of popularity compared to the other door ' +
-        'games, but it had a few dedicated players and I was always happy to see it ' +
-        'running. ' +
-        'As for the BBS itself, it did not take long for The ' +
-        'Entryway to gain a few hundred users. Much to my surprise, several people even' +
-        'mailed me money to cover the costs of registering my shareware BBS software and' +
-        'door games. There were even some regulars that I got to know pretty ' +
-        'well, a few of which I became friends with outside of the BBS.',
-
-        'In all, The Entryway remained active for just under four years. It was the waning days ' +
-        'of the BBS era and daily logins dropped as people migrated their online activities to ' +
-        'the Internet (including myself). ' +
-        'But, I remained friends with that group of regulars, many of them to this day. ' +
-        'And through those friends, I met others, which further expanded into a great web of friends ' +
-        'and acquaintances. These social connections, which would go on to influence my interests, my ' +
-        'romantic relationships, and even my career, all stem from this common root. Had I not decided ' +
-        'to dive into that little summer project, I cannot even imagine what direction my life might have ' +
-        'taken and the person I would be today.'
-    ];
-    if (options.storyPhase < 4) {
-        let noteIndex = options.storyPhase-1;
-        util.draw(headings[noteIndex], 15, 1, 1);
-        drawTextWrapped(noteText[noteIndex], 13, 1, 3, SCREEN_WIDTH-2);
-    } else {
-        // TODO: Note menu
+function showNote(num) {
+    if (options.storyPhase >= num) {
+        selectedNote = num;
+        state = STATE_NOTES;
     }
+}
+
+function drawNote(num) {
+    let noteIndex = num > 0 ? num-1 : options.storyPhase-1;
+    let note = getNote(noteIndex);
+    if (options.storyPhase < 4 && note !== false) {
+        util.draw(note.heading, 15, 1, 1);
+        drawTextWrapped(note.text, 13, 1, 3, SCREEN_WIDTH-2);
+    }
+}
+
+function drawNoteMenu() {
+    let maxNotes = options.storyPhase;
+    let menu = '';
+    for (let i=0; i<3; i++) {
+        if (i < maxNotes) {
+            let note = getNote(i);
+            menu += '~F(~H' + (i+1) + '~F)~D ' + note.heading + "\n";
+        } else {
+            menu += '~6(' + (i+1) + ") ---\n";
+        }
+        menu += '~C══════════════════════════════\n';
+    }
+    menu += '~F(~HQ~F)~D Return to Doors Menu';
+    util.draw(menu, 15, 2, 2);
+}
+
+function getNote(num) {
+    let notes = [
+        {
+            'heading': '~F<~HThe Entryway BBS~F>',
+            'text': 'I started The Entryway BBS the summer before my sophomore year of high ' +
+                'school. I thought it would be a fun project. Plus, it could be a way to distribute the ' +
+                "games and mods I made (it wasn't. I was notorious for never finishing them). " + 
+                'My favorite BBS feature was the door games, though. ' +
+                'Somewhere, I discovered a game called "Bowling Solitaire" that was an ' +
+                'interesting diversion from the usual role-playing and space trading, so I ' +
+                'installed it on The Entryway.'
+        },
+        {
+            'heading': '~F<~HA Modest Success~F>',
+            'text': 'Bowling Solitaire never gained a lot of popularity compared to the other door ' +
+                'games, but it had a few dedicated players and I was always happy to see it ' +
+                'running. ' +
+                'As for the BBS itself, it did not take long for The ' +
+                'Entryway to gain a few hundred users. Much to my surprise, several people even' +
+                'mailed me money to cover the costs of registering my shareware BBS software and' +
+                'door games. There were even some regulars that I got to know pretty ' +
+                'well, a few of which I became friends with outside of the BBS.'
+        },
+        {
+            'heading': '~F<~HThe Exit~F>',
+            'text': 'In all, The Entryway remained active for just under four years. It was the waning days ' +
+                'of the BBS era and daily logins dropped as people migrated their online activities to ' +
+                'the Internet (including myself). ' +
+                'But, I remained friends with that group of regulars, many of them to this day. ' +
+                'And through those friends, I met others, which further expanded into a great web of friends ' +
+                'and acquaintances. These social connections, which would go on to influence my interests, my ' +
+                'romantic relationships, and even my career, all stem from this common root. Had I not decided ' +
+                'to dive into that little summer project, I cannot even imagine what direction my life might have ' +
+                'taken and the person I would be today.'
+        }
+    ];
+
+    if (num < 0 || num >= notes.length) {
+        return false;
+    }
+    return notes[num];
 }
 
 function advanceStory() {
