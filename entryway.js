@@ -619,8 +619,6 @@ let state = STATE_LOGIN;
 let options = {"showHints": true, "visibleTrash": false, "players": 1, "storyPhase": 0};
 let selectedNote = 0;
 
-var debugText = "";
-
 function getName() {
     return "Entryway BBS";
 }
@@ -652,7 +650,6 @@ function onUpdate() {
             drawTrash();
             util.draw("Press <~FSPACE~9> to end roll", 9,
                 SCREEN_WIDTH/2 - 11, SCREEN_HEIGHT-2);
-            drawText(debugText, 3, 0, SCREEN_HEIGHT-1);
             break;
         case STATE_GAMEOVER:
             drawFinalScores();
@@ -796,7 +793,7 @@ function drawSettingsMenu() {
     let title = "B O W L I N G\n     S O L I T A I R E";
     let menu = "~7(~HS~7)~Ftart Game\n" +
                "~7(~HH~7)~Fints: " + (options.showHints ? "~HON~F" : "~8OFF~F") + "\n" +
-               "~7(~HV~7)~Fisible Trash Pile: " + (options.visibleTrash ? "~HON~F" : "~8OFF~F") + "\n" +
+               "~7(~HV~7)~Fisible Discards: " + (options.visibleTrash ? "~HON~F" : "~8OFF~F") + "\n" +
                //"~7(~HP~7)~Flayers: " + options.players + "\n" +
                "~7(~HQ~7)~Fuit";
     let graphic = "\n" +
@@ -897,7 +894,7 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
         }
         util.draw(padString(frameTotal,3), 15, x + (4*(i+1)), y+4);
     }
-    //debugText = gameData.scores[0].toString();
+
     let runningTotal = gameData.getTotalScore(player);
     if (maxFrame == 9) {
         util.draw(frameRight, 15, x + frameWidth + 4 - 1 + 2, y);
@@ -1126,7 +1123,7 @@ function drawHandCard(pos, value, stackSize, available) {
 
 function drawTrash() {
     if (options.visibleTrash) {
-        drawText("Trash [" + gameData.deck.toString() + "]", 8, 0, 0);
+        drawText("Discarded [" + gameData.deck.toString() + "]", 8, 0, SCREEN_HEIGHT-1);
     }
 }
 
