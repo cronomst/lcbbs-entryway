@@ -677,6 +677,10 @@ function onInput(key) {
             processSettingInput(key);
             break;
         case STATE_GAME:
+            if (key == 27) {// Esc
+                state = STATE_SETTINGS;
+                return;
+            }
             gameData.processInput(key);
             if (gameData.gameOver == true) {
                 state = STATE_GAMEOVER;
@@ -849,7 +853,7 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
         }
         util.draw(padString(frameTotal,3), 15, x + (4*(i+1)), y+4);
     }
-    debugText = gameData.scores[0].toString();
+    //debugText = gameData.scores[0].toString();
     let runningTotal = gameData.getTotalScore(player);
     if (maxFrame == 9) {
         util.draw(frameRight, 15, x + frameWidth + 4 - 1 + 2, y);
@@ -905,21 +909,51 @@ function getFrameSymbols(frameData, frameNum) {
 }
 
 function drawNote() {
-    let heading = '~F<~HThe Entryway BBS~F>';
-    let noteText = "I started The Entryway BBS the summer before my sophomore year of high " +
-               "school. I thought it would be a fun project and a way to distribute the " +
-               "games I made (it wasn't. I was notorious for never finishing them). " + 
-               "My favorite BBS feature was the door games, though. " +
-               "Somewhere, I discovered a game called \"Bowling Solitaire\" that was an " +
-               "interesting diversion from the usual role-playing and space trading, so I " +
-               "installed it on The Entryway.";
-    util.draw(heading, 15, 1, 1);
-    drawTextWrapped(noteText, 13, 1, 3, SCREEN_WIDTH-2);
+    let headings = [
+        '~F<~HThe Entryway BBS~F>',
+        '~F<~HA Modest Success~F>',
+        '~F<~HPhase 3~F>'
+    ];
+    let noteText = [
+        'I started The Entryway BBS the summer before my sophomore year of high ' +
+        'school. I thought it would be a fun project. Plus, it could be a way to distribute the ' +
+        "games and mods I made (it wasn't. I was notorious for never finishing them). " + 
+        'My favorite BBS feature was the door games, though. ' +
+        'Somewhere, I discovered a game called "Bowling Solitaire" that was an ' +
+        'interesting diversion from the usual role-playing and space trading, so I ' +
+        'installed it on The Entryway.',
+
+        'Bowling Solitaire never gained a lot of popularity compared to the other door ' +
+        'games, but it had a few dedicated players and I was always happy to see when it ' +
+        'was running. ' +
+        'Even though it was near the end of the BBS era, it did not take long the The ' +
+        'Entryway to gain a few hundred users. I got to know some of the regulars pretty ' +
+        'well and even became friends with several of them in the real world.',
+
+        'Phase 3 text'
+    ];
+    if (options.storyPhase < 4) {
+        let noteIndex = options.storyPhase-1;
+        util.draw(headings[noteIndex], 15, 1, 1);
+        drawTextWrapped(noteText[noteIndex], 13, 1, 3, SCREEN_WIDTH-2);
+    } else {
+        // TODO: Note menu
+    }
 }
 
 function advanceStory() {
+    let phase1ScoreTrigger = 50;
+    let phase2ScoreTrigger = 100;
     if (options.storyPhase == 0) {
         options.storyPhase = 1;
+        //saveData(JSON.stringify(options)); 
+        state = STATE_NOTES;
+    } else if (options.storyPhase == 1 && gameData.getTotalScore(0) >= phase1ScoreTrigger) {
+        options.storyPhase = 2;
+        //saveData(JSON.stringify(options)); 
+        state = STATE_NOTES;
+    } else if (options.storyPhase == 2 && gameData.getTotalScore(0) >= phase2ScoreTrigger) {
+        options.storyPhase = 3;
         //saveData(JSON.stringify(options)); 
         state = STATE_NOTES;
     } else {
