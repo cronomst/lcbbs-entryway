@@ -694,14 +694,33 @@ function drawDoorsMenu() {
 }
 
 function drawSettingsMenu() {
-    let menu = "B O W L I N G   S O L I T A I R E\n\n" + 
-               "(S)tart Game\n" +
-               "(H)ints: " + (options.showHints ? "ON" : "OFF") + "\n" +
-               "(V)isible Trash Pile: " + (options.visibleTrash ? "ON" : "OFF") + "\n" +
-               "(P)layers: " + options.players + "\n" +
-               "(Q)uit";
+    let title = "B O W L I N G\n     S O L I T A I R E";
+    let menu = "~7(~HS~7)~Ftart Game\n" +
+               "~7(~HH~7)~Fints: " + (options.showHints ? "~HON~F" : "~8OFF~F") + "\n" +
+               "~7(~HV~7)~Fisible Trash Pile: " + (options.visibleTrash ? "~HON~F" : "~8OFF~F") + "\n" +
+               "~7(~HP~7)~Flayers: " + options.players + "\n" +
+               "~7(~HQ~7)~Fuit";
+    let graphic = "\n" +
+"                         \n" +
+"                         \n" +
+"                         \n" +
+"                         \n" +
+"                         \n" +
+"       ,...              \n" +
+"    .;;'   `'-.          \n" +
+"  .;;:         '.        \n" +
+" .;;:'( )        .       \n" +
+" ;;:'             :      \n" +
+" ;;:( )   ( )     :      \n" +
+" ;;::.            :      \n" +
+" ';;::.          '       \n" +
+"  ';;::.       .'        \n" +
+"    '-;;:..,.-'          \n" +
+"        '''              ";
 
-    util.draw(menu, 16, 1, 0);
+    util.draw(title, 15, 1, 1);
+    util.draw(graphic, 15, SCREEN_WIDTH-26, 0);
+    util.draw(menu, 15, 1, 10);
     util.draw("Choose (S,H,V,P,Q):_█_", 15, 1, SCREEN_HEIGHT-2);
 }
 
