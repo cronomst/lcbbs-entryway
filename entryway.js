@@ -616,7 +616,7 @@ const STATE_NOTE_LIST = 6;
 let util = new TextUtil();
 let gameData = new GameData();
 let state = STATE_LOGIN;
-let options = {"showHints": true, "visibleTrash": false, "players": 1, "storyPhase": 0};
+let options = {"showHints": false, "visibleTrash": false, "players": 1, "storyPhase": 0};
 let selectedNote = 0;
 
 function getName() {
