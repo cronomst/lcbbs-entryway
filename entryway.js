@@ -1000,26 +1000,27 @@ function getNote(num) {
         },
         {
             'heading': 'A Modest Success',
-            'text': 'Bowling Solitaire never gained a lot of popularity compared to the other door ' +
+            'text': '"Bowling Solitaire" never gained a lot of popularity compared to the other door ' +
                 'games, but it had a few dedicated players and I was always happy to see it ' +
                 'running. ' +
                 'As for the BBS itself, it did not take long for The ' +
-                'Entryway to gain a few hundred users. Much to my surprise, several people even' +
-                'mailed me money to cover the costs of registering my shareware BBS software and' +
-                'door games. There were even some regulars that I got to know pretty ' +
-                'well, a few of which I became friends with outside of the BBS.'
+                'Entryway to gain a few hundred users. Much to my surprise, several people even ' +
+                'sent money to cover the costs of registering my shareware BBS software and ' +
+                'door games! It told me that there were people that enjoyed what I had created ' +
+                'and I found that immensely satisfying. I began to recognize the names of some of the ' +
+                'regulars and had conversations with a lot of them. There were even a few that ' +
+                'I got to know pretty well who eventually became friends outside of the BBS.'
         },
         {
             'heading': 'The Exit',
-            'text': 'In all, The Entryway remained active for just under four years. It was the waning days ' +
-                'of the BBS era and daily logins dropped as people migrated their online activities to ' +
-                'the Internet (including myself). ' +
-                'But, I remained friends with that group of regulars, many of them to this day. ' +
-                'And through those friends, I met others, which further expanded into a great web of friends ' +
+            'text': 'The Entryway remained active for just under four years. The waning days ' +
+                'of the BBS era saw a migration of people from local BBSs to the Internet (including myself). ' +
+                'But, even after I shut down the system, I remained friends with a handful of those regular users. ' +
+                'And through those friends, I met others, and then others still, expanding into a great web of friends ' +
                 'and acquaintances. These social connections, which would go on to influence my interests, my ' +
-                'romantic relationships, and even my career, all stem from this common root. Had I not decided ' +
-                'to dive into that little summer project, I cannot even imagine what direction my life might have ' +
-                'taken and the person I would be today.'
+                'relationships, and even my career, all stem from this common root. Had that 15 year old kid not decided ' +
+                'to tinker with BBS software as a little summer project, I cannot even imagine what direction my life might ' +
+                'have taken or the person I would be today.'
         }
     ];
 
