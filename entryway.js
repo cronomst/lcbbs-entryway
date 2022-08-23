@@ -211,8 +211,8 @@ let GameData = function() {
 
     this.shuffleDeck = function() {
         for (let i=0; i<TOTAL_CARDS; i++) {
-            this.deck.push(0);
-            //this.deck.push((i+1) % TOTAL_PINS);
+            //this.deck.push(0);
+            this.deck.push((i+1) % TOTAL_PINS);
         }
         for (let i=this.deck.length-1; i>0; i--) {
             let j = Math.floor(Math.random() * (i + 1));
