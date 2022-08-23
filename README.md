@@ -1,7 +1,7 @@
 # "Bowling Solitaire" for Last Call BBS
 
 This is a game of Bowling Solitaire meant to be played from "Netronics Connect!" in
-Zachtronics' [Last Call BBS](https://www.zachtronics.com/last-call-bbs/).
+Zachtronics' [Last Call BBS](https://www.zachtronics.com/last-call-bbs/). It is based on Sid Sackson's version described in the book "A Gamut of Games."
 
 ## Installation
 
