@@ -1,3 +1,12 @@
+/**
+ * Bowling Solitaire for "Last Call BBS"
+ * 
+ * By Kenneth Shook
+ */
+
+/**
+ * Utility class for handling common drawing tasks
+ */
 let TextUtil  = function() {
     const TOK_TEXT = 0;
     const TOK_COLOR = 1;
@@ -763,29 +772,23 @@ function drawLogin() {
 function drawDoorsMenu() {
     let menu;
     let opts;
+    let memoLine;
     if (options.storyPhase < 1) {
-        menu = "~6╔════════════════════════════════════════════════════╗\n" +
-               "║                 ~GD O O R   G A M E S~6                ║\n" +
-               "╠═══════════════════════╦════════════════════════════╣\n" +
-               "║~A<~H1~A>~C ~HBowling Solitaire~6  ║ ~CA game of solitaire played~6 ║\n" +
-               "║                       ║ ~Cwith the rules of bowling.~6 ║\n" +
-               "║                       ║                            ║\n" +
-               "║<2> ...Coming soon...~6  ║ ~C~6                           ║\n" +
-               "║                       ║                            ║\n" +
-               "╚═══════════════════════╩════════════════════════════╝";
+        memoLine = "║<2> ...Coming soon...~6  ║ ~C~6                           ║\n";
         opts = '1';
     } else {
-        menu = "~6╔════════════════════════════════════════════════════╗\n" +
-               "║                 ~GD O O R   G A M E S~6                ║\n" +
-               "╠═══════════════════════╦════════════════════════════╣\n" +
-               "║~A<~H1~A>~C ~HBowling Solitaire~6  ║ ~CA game of solitaire played~6 ║\n" +
-               "║                       ║ ~Cwith the rules of bowling.~6 ║\n" +
-               "║                       ║                            ║\n" +
-               "║~A<~H2~A>~C ~HMemo Pad~6           ║ ~CMessages from the SysOp~6    ║\n" +
-               "║                       ║                            ║\n" +
-               "╚═══════════════════════╩════════════════════════════╝";
+        memoLine = "║~A<~H2~A>~C ~HMemo Pad~6           ║ ~CMessages from the SysOp~6    ║\n";
         opts = '1,2'
     }
+    menu = "~6╔════════════════════════════════════════════════════╗\n" +
+             "║                 ~GD O O R   G A M E S~6                ║\n" +
+             "╠═══════════════════════╦════════════════════════════╣\n" +
+             "║~A<~H1~A>~C ~HBowling Solitaire~6  ║ ~CA game of solitaire played~6 ║\n" +
+             "║                       ║ ~Cwith the rules of bowling.~6 ║\n" +
+             "║                       ║                            ║\n" +
+             memoLine +
+             "║                       ║                            ║\n" +
+             "╚═══════════════════════╩════════════════════════════╝";
     util.draw(menu, 6, 1, 5);
     util.draw("Choose (" + opts + "):_█_", 15, 1, SCREEN_HEIGHT-2);
 }
