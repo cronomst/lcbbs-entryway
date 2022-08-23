@@ -1,7 +1,7 @@
 # "Bowling Solitaire" for Last Call BBS
 
 This is a game of Bowling Solitaire meant to be played from "Netronics Connect!" in
-Zachtronics' Last Call BBS.
+Zachtronics' [Last Call BBS](https://www.zachtronics.com/last-call-bbs/).
 
 ## Installation
 
@@ -15,7 +15,7 @@ This game will appear under "Netronics Connect!" as "Entryway BBS." Connect to t
 
 Each card on the field features a letter above it. Type the letter shown to select the card. Select combinations of up to 3 "pin" cards so that the last digit of their sums matches with one of the face-up cards in your hand (you may press a selected pin card's letter again to de-select all cards). Once your pin cards are selected, choose a card from your hand to play that card. If the last digit sum matches, the pin cards and card from your hand will be removed from play. When you have no more viable options, press the SPACE key to complete your roll.
 
-Much like real bowling, clearing all pin cards from play on your first roll of a frame (you have pressed the SPACE key) will score a strike. Likewise, clearing all pins within by the second roll of a frame will result in a spare.
+Much like real bowling, clearing all pin cards from play on the first roll of a frame will score a strike. Likewise, clearing all pins by the second roll of a frame will result in a spare.
 
 ## Game Settings
 
