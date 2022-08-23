@@ -202,8 +202,8 @@ let GameData = function() {
 
     this.shuffleDeck = function() {
         for (let i=0; i<TOTAL_CARDS; i++) {
-            //this.deck.push(0);
-            this.deck.push((i+1) % TOTAL_PINS);
+            this.deck.push(0);
+            //this.deck.push((i+1) % TOTAL_PINS);
         }
         for (let i=this.deck.length-1; i>0; i--) {
             let j = Math.floor(Math.random() * (i + 1));
@@ -357,9 +357,10 @@ let GameData = function() {
         if (this.hand[handPos][0] !== this.getSelectedPinSum()) {
             return false;
         }
-        this.deck.push(this.hand[handPos][0]); // Add to deck for keeping track of trash
 
         let playedCard = this.hand[handPos].shift();
+        this.deck.push(playedCard); // Add to deck for keeping track of trash
+
         for (let i=0; i<this.selectedPins.length; i++) {
             this.deck.push(this.pins[this.selectedPins[i]].value); // Add to deck for keeping track of trash
             this.pins[this.selectedPins[i]].value = -1;
@@ -402,7 +403,7 @@ let GameData = function() {
             this.nextFrame();
             return;
         } else if (this.roll > 1 && this.frame == 10 
-                && this.frameScores[9].rolls[0] + this.frameScores[9].rolls[0] < 10) {
+                && this.frameScores[9].rolls[0] + this.frameScores[9].rolls[1] < 10) {
             this.endGame();
         } else if (this.roll > 2) {
             this.endGame();

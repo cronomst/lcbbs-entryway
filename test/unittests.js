@@ -42,9 +42,8 @@ var UnitTests = function() {
         this.out('<h3>testUpdateFrameScore</h3>');
         let game = new GameData();
         game.init();
-        game.pins[0].value = -1;
-        game.pins[1].value = -1;
 
+        this.knockDownPins(game, 2);
         game.updateFrameScore();
         this.assertEquals(2, game.scores[0][0], "2 pins first roll of first frame");
         game.nextRoll();
