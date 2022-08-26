@@ -967,6 +967,8 @@ function drawNote(num) {
         util.draw('~F<~H' + note.heading + '~F>', 15, 1, 1);
         drawTextWrapped(note.text, 13, 1, 3, SCREEN_WIDTH-2);
     }
+    util.draw('Press any key to continue...', 9,
+                SCREEN_WIDTH/2 - 14, SCREEN_HEIGHT-2);
 }
 
 function drawNoteMenu() {
