@@ -839,7 +839,7 @@ function drawHand() {
 }
 
 function drawPinCards() {
-    for (let i=0; i<this.gameData.pins.length; i++) {
+    for (let i=0; i<gameData.pins.length; i++) {
         let pin = gameData.pins[i];
         drawPinCard(i+1, pin.label, pin.value, gameData.isPinSelected(i), pin.available);
     }
