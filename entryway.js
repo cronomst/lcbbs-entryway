@@ -836,9 +836,11 @@ function drawHand() {
             gameData.hand[i].length,
             isAvailable);
     }
+    drawText('H A N D', 12, 9, 11);
 }
 
 function drawPinCards() {
+    drawText('P I N S', 12, PIN_ORIGIN_X + 11, PIN_ORIGIN_Y-1);
     for (let i=0; i<gameData.pins.length; i++) {
         let pin = gameData.pins[i];
         drawPinCard(i+1, pin.label, pin.value, gameData.isPinSelected(i), pin.available);
@@ -895,8 +897,10 @@ function drawFrameScores(minFrame, maxFrame, x, y) {
         util.draw(frameSymbols.second.toString(), 15, x + (4*(i+1)+2), y+3);
         if (frameNum == 10) {
             util.draw(frameSymbols.third.toString(), 15, x + (4*(i+1)+4), y+3);
+            util.draw(padString(frameTotal,5), 15, x + (4*(i+1)), y+4);
+        } else {
+            util.draw(padString(frameTotal,3), 15, x + (4*(i+1)), y+4);
         }
-        util.draw(padString(frameTotal,3), 15, x + (4*(i+1)), y+4);
     }
 
     let runningTotal = gameData.getTotalScore(player);
@@ -1115,17 +1119,18 @@ function drawHandCard(pos, value, stackSize, available) {
     let row = 12;
     let col = 2;
     let card = cardData[pos-1];
-    let cardFace = "~F╔═~H" + card.label + "~F═╗\n" +
+    let cardFace = "~C╔═~H" + card.label + "~C═╗\n" +
                    "║ " + value + " ║";
     let cardMiddle = "╠═══╣";
     let cardBottom = "╚═══╝";
-    let color=15
+    let color=14
 
-    util.draw(cardFace, color, card.x + col, row);
-    for (let i=0; i<stackSize-1; i++) {
-        drawText(cardMiddle, color, card.x + col, row + i + 2);
+    util.draw(cardFace, 12, card.x + col, row);
+    drawText(cardBottom, 12, card.x + col, row + 2);
+    for (let i=1; i<stackSize-1; i++) {
+        drawText(cardMiddle, 6, card.x + col, row + i + 2);
     }
-    drawText(cardBottom, color, card.x + col, row + stackSize + 1);
+    drawText(cardBottom, 6, card.x + col, row + stackSize + 1);
 }
 
 function drawTrash() {
