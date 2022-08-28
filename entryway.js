@@ -622,6 +622,7 @@ const STATE_GAME = 3;
 const STATE_GAMEOVER = 4;
 const STATE_NOTES = 5;
 const STATE_NOTE_LIST = 6;
+const STATE_INSTRUCTIONS = 7;
 
 let util = new TextUtil();
 let gameData = new GameData();
@@ -658,7 +659,7 @@ function onUpdate() {
             drawPinCards();
             drawScore();
             drawTrash();
-            util.draw("Press <~FSPACE~9> to end roll", 9,
+            util.draw("Press <~HSPACE~9> to end roll", 9,
                 SCREEN_WIDTH/2 - 11, SCREEN_HEIGHT-2);
             break;
         case STATE_GAMEOVER:
@@ -673,6 +674,9 @@ function onUpdate() {
             break;
         case STATE_NOTE_LIST:
             drawNoteMenu();
+            break;
+        case STATE_INSTRUCTIONS:
+            drawInstructions();
             break;
     }
 }
@@ -725,6 +729,9 @@ function onInput(key) {
                 state = STATE_DOORS;
             }
             break;
+        case STATE_INSTRUCTIONS:
+            state = STATE_SETTINGS;
+            break;
     }
 }
 
@@ -739,7 +746,9 @@ function processSettingInput(key) {
     } else if (keyChar == "V") { // Visible trash toggle
         options.visibleTrash = !options.visibleTrash;
         saveOptions();
-    } else if (keyChar == "P") { // Player count toggle
+    } else if (keyChar == "P") { // Player count toggle (not implemented)
+    } else if (keyChar == "I") {
+        state = STATE_INSTRUCTIONS;
     } else if (keyChar == "Q") {
         state = STATE_DOORS;
     } else if (keyChar == '!') { // Delete save data
@@ -799,6 +808,7 @@ function drawSettingsMenu() {
                "~7(~HH~7)~Fints: " + (options.showHints ? "~HON~F" : "~8OFF~F") + "\n" +
                "~7(~HV~7)~Fisible Discards: " + (options.visibleTrash ? "~HON~F" : "~8OFF~F") + "\n" +
                //"~7(~HP~7)~Flayers: " + options.players + "\n" +
+               "~7(~HI~7)~Fnstructions\n" +
                "~7(~HQ~7)~Fuit";
     let graphic = "\n" +
 "~1██████████████▛~D ,;-. ~1▟███~D\n" +
@@ -824,7 +834,7 @@ function drawSettingsMenu() {
     util.draw(title, 17, 2, 4);
     util.draw(graphic, 13, SCREEN_WIDTH-26, 0);
     util.draw(menu, 15, 1, 10);
-    util.draw("Choose (S,H,V,Q):_█_", 15, 1, SCREEN_HEIGHT-2);
+    util.draw("Choose (S,H,V,I,Q):_█_", 15, 1, SCREEN_HEIGHT-2);
 }
 
 function drawHand() {
@@ -1142,6 +1152,25 @@ function drawTrash() {
 function drawFinalScores() {
     util.draw('F I N A L   S C O R E S', 16, SCREEN_WIDTH/2 - 12, 2);
     drawFrameScores(0, 9, 3, 4);
+    util.draw('Press any key to continue...', 9,
+                SCREEN_WIDTH/2 - 14, SCREEN_HEIGHT-2);
+}
+
+function drawInstructions() {
+    let instructions = "~G1.~C Choose up to 3 adjacent pins. Pins available for\n" +
+                       "   selection will have their key ~Hhighlighted~C.\n" +
+                       "   (press the key of a selected pin to deselect all)\n\n" +
+                       "~G2.~C If the last digit of the sum of the selected pins\n" +
+                       "   matches a card in your hand, you may play that\n" +
+                       "   card to remove those pins.\n\n" +
+                       "~G3.~C If no hand card match any available pin sums, \n" +
+                       "   press ~HSPACE~C to end your roll. If this is the\n" +
+                       "   first roll of the frame, your visible hand cards\n" +
+                       "   will be discarded and you will be given the chance\n" +
+                       "   to pick up a spare.";
+    util.draw('~F<~HBowling Solitaire Instructions~F>', 15, 1, 1);
+    util.draw(instructions, 13, 1, 3);
+
     util.draw('Press any key to continue...', 9,
                 SCREEN_WIDTH/2 - 14, SCREEN_HEIGHT-2);
 }
