@@ -335,20 +335,15 @@ let GameData = function() {
     };
 
     this.deselectPin = function(pos) {
-        // For now, just deselect everything because the logic below
-        // doesn't work when only one item remains and it should
-        // not be selectable on its own.
-        this.selectedPins = [];
-
-        // this.selectedPins.splice(this.selectedPins.indexOf(pos), 1);
-        // // Remove another selection if we break the adjacency rule
-        // if (this.selectedPins.length > 1) {
-        //     leftPin = this.selectedPins[0];
-        //     rightPin = this.selectedPins[1];
-        //     if (PIN_ADJACENCY[leftPin].indexOf(rightPin) < 0) {
-        //         this.selectedPins.pop();
-        //     }
-        // }
+        // If it's the most recent selection, just deselect it. Otherwise,
+        // deselect all of them to prevent anything from remaining selected
+        // that shouldn't be.
+        let end = this.selectedPins.length - 1;
+        if (this.selectedPins.length > 1 && pos == this.selectedPins[end]) {
+            this.selectedPins.pop();
+        } else {
+            this.selectedPins = [];
+        }
     };
 
     this.getSelectedPinSum = function() {
@@ -1168,7 +1163,7 @@ function drawInstructions() {
                        "of them face-up.\n" +
                        "~G1.~A Choose ~Gup to 3 adjacent pins~A. Pins available for\n" +
                        "   selection will have their key ~Hhighlighted~A.\n" +
-                       "   (press the key of a selected pin to deselect all)\n" +
+                       "   (selecting a pin again will deselect it)\n" +
                        "~G2.~A If the ~Glast digit~A of the sum of the selected pins\n" +
                        "   matches a card in your hand, you may play that\n" +
                        "   card to remove those pins.\n" +

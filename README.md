@@ -13,7 +13,7 @@ This game will appear under "Netronics Connect!" as "Entryway BBS." Connect to t
 
 ## Playing the game
 
-Each card on the field features a letter above it. Type the letter shown to select the card. Select combinations of up to 3 "pin" cards so that the last digit of their sums matches with one of the face-up cards in your hand (you may press a selected pin card's letter again to de-select all cards). Once your pin cards are selected, choose a card from your hand to play that card. If the last digit sum matches, the pin cards and card from your hand will be removed from play. When you have no more viable options, press the SPACE key to complete your roll.
+Each card on the field features a letter above it. Type the letter shown to select the card. Select combinations of up to 3 "pin" cards so that the last digit of their sums matches with one of the face-up cards in your hand (you may press a selected pin card's letter again to de-select it). Once your pin cards are selected, choose a card from your hand to play that card. If the last digit sum matches, the pin cards and card from your hand will be removed from play. When you have no more viable options, press the SPACE key to complete your roll.
 
 Much like real bowling, clearing all pin cards from play on the first roll of a frame will score a strike. Likewise, clearing all pins by the second roll of a frame will result in a spare.
 
