@@ -623,6 +623,7 @@ const STATE_GAMEOVER = 4;
 const STATE_NOTES = 5;
 const STATE_NOTE_LIST = 6;
 const STATE_INSTRUCTIONS = 7;
+const STATE_POSTGAME_NOTE = 8;
 
 let util = new TextUtil();
 let gameData = new GameData();
@@ -666,6 +667,7 @@ function onUpdate() {
             drawFinalScores();
             break;
         case STATE_NOTES:
+        case STATE_POSTGAME_NOTE:
             if (selectedNote) {
                 drawNote(selectedNote);
             } else {
@@ -713,6 +715,9 @@ function onInput(key) {
             break;
         case STATE_NOTES:
             state = STATE_NOTE_LIST;
+            break;
+        case STATE_POSTGAME_NOTE:
+            state = STATE_SETTINGS;
             break;
         case STATE_NOTE_LIST:
             if (keyCode == "1") {
@@ -1056,15 +1061,15 @@ function advanceStory() {
     if (options.storyPhase == 0) {
         options.storyPhase = 1;
         saveOptions();
-        state = STATE_NOTES;
+        state = STATE_POSTGAME_NOTE;
     } else if (options.storyPhase == 1 && gameData.getTotalScore(0) >= phase1ScoreTrigger) {
         options.storyPhase = 2;
         saveOptions();
-        state = STATE_NOTES;
+        state = STATE_POSTGAME_NOTE;
     } else if (options.storyPhase == 2 && gameData.getTotalScore(0) >= phase2ScoreTrigger) {
         options.storyPhase = 3;
         saveOptions();
-        state = STATE_NOTES;
+        state = STATE_POSTGAME_NOTE;
     } else {
         state = STATE_SETTINGS;
     }
