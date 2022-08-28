@@ -1157,22 +1157,26 @@ function drawFinalScores() {
 }
 
 function drawInstructions() {
-    let instructions = "~G1.~C Choose up to 3 adjacent pins. Pins available for\n" +
-                       "   selection will have their key ~Hhighlighted~C.\n" +
-                       "   (press the key of a selected pin to deselect all)\n\n" +
-                       "~G2.~C If the last digit of the sum of the selected pins\n" +
+    let instructions = "This is played with a deck of ~Gtwo sets of cards\n" +
+                       "numbered 0 through 9~A. Ten are dealt to represent pins\n" +
+                       "and the remaining ten are dealt to your hand, three\n" +
+                       "of them face-up.\n" +
+                       "~G1.~A Choose ~Gup to 3 adjacent pins~A. Pins available for\n" +
+                       "   selection will have their key ~Hhighlighted~A.\n" +
+                       "   (press the key of a selected pin to deselect all)\n" +
+                       "~G2.~A If the ~Glast digit~A of the sum of the selected pins\n" +
                        "   matches a card in your hand, you may play that\n" +
-                       "   card to remove those pins.\n\n" +
-                       "~G3.~C If no card in your hand matches any available pin\n" +
-                       "   sums, press ~HSPACE~C to end your roll. If this is the\n" +
+                       "   card to remove those pins.\n" +
+                       "~G3.~A If no card in your hand matches any available pin\n" +
+                       "   sums, press ~HSPACE~A to end your roll. If this is the\n" +
                        "   first roll of the frame, your face-up cards will be\n" +
                        "   discarded and you will be given the chance to pick\n" +
                        "   up a spare.";
-    util.draw('~F<~HBowling Solitaire Instructions~F>', 15, 1, 1);
-    util.draw(instructions, 13, 1, 3);
+    util.draw('~F<~HBowling Solitaire Instructions~F>', 15, 1, 0);
+    util.draw(instructions, 10, 1, 2);
 
     util.draw('Press any key to continue...', 9,
-                SCREEN_WIDTH/2 - 14, SCREEN_HEIGHT-2);
+                SCREEN_WIDTH/2 - 14, SCREEN_HEIGHT-1);
 }
 
 function loadOptions() {
