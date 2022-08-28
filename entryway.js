@@ -806,7 +806,7 @@ function drawSettingsMenu() {
     let title = "B O W L I N G\n     S O L I T A I R E";
     let menu = "~7(~HS~7)~Ftart Game\n" +
                "~7(~HH~7)~Fints: " + (options.showHints ? "~HON~F" : "~8OFF~F") + "\n" +
-               "~7(~HV~7)~Fisible Discards: " + (options.visibleTrash ? "~HON~F" : "~8OFF~F") + "\n" +
+               "~7(~HV~7)~Fiew Discards: " + (options.visibleTrash ? "~HON~F" : "~8OFF~F") + "\n" +
                //"~7(~HP~7)~Flayers: " + options.players + "\n" +
                "~7(~HI~7)~Fnstructions\n" +
                "~7(~HQ~7)~Fuit";
@@ -1136,11 +1136,11 @@ function drawHandCard(pos, value, stackSize, available) {
     let color=14
 
     util.draw(cardFace, 12, card.x + col, row);
-    drawText(cardBottom, 12, card.x + col, row + 2);
     for (let i=1; i<stackSize-1; i++) {
         drawText(cardMiddle, 6, card.x + col, row + i + 2);
     }
     drawText(cardBottom, 6, card.x + col, row + stackSize + 1);
+    drawText(cardBottom, 12, card.x + col, row + 2);
 }
 
 function drawTrash() {
@@ -1163,11 +1163,11 @@ function drawInstructions() {
                        "~G2.~C If the last digit of the sum of the selected pins\n" +
                        "   matches a card in your hand, you may play that\n" +
                        "   card to remove those pins.\n\n" +
-                       "~G3.~C If no hand card match any available pin sums, \n" +
-                       "   press ~HSPACE~C to end your roll. If this is the\n" +
-                       "   first roll of the frame, your visible hand cards\n" +
-                       "   will be discarded and you will be given the chance\n" +
-                       "   to pick up a spare.";
+                       "~G3.~C If no card in your hand matches any available pin\n" +
+                       "   sums, press ~HSPACE~C to end your roll. If this is the\n" +
+                       "   first roll of the frame, your face-up cards will be\n" +
+                       "   discarded and you will be given the chance to pick\n" +
+                       "   up a spare.";
     util.draw('~F<~HBowling Solitaire Instructions~F>', 15, 1, 1);
     util.draw(instructions, 13, 1, 3);
 
